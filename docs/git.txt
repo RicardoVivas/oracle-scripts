@@ -1,0 +1,26 @@
+git remote show origin
+
+git diff  master origiin/master
+
+git has two local master : master and origin master. Origin master track changes in remote repository.
+
+git pull =  git fetch & merge
+
+Add  repository from another PC
+git remote add cuscax@webora: ~/demo/myrepo
+git diff webora/master master
+
+git merge
+
+scm.elab.warwick.ac.uk
+
+merge vs rebase (preferred)
+
+Git Branch
+git co <branch>
+
+git merge new tag
+
+git co --patch hash_string 
+
+
