@@ -1,0 +1,122 @@
+
+------------- Solaris 10 -------------
+
+Oracle user resource
+
+See: http://www.akadia.com/services/ora10_sol10_install.html
+http://oracletech.com.au/?p=42
+
+The following command created a project for the oracle user.
+projadd group.dba
+projects -l group.dba
+
+
+cat /etc/project
+    system:0::::
+    user.root:1::::
+    noproject:2::::
+    default:3::::
+    group.staff:10::::
+    user.oracle:100::oracle::project.max-shm-memory=(priv,4294967296,deny)
+
+Because the name was of the form "user.username" it becomes the oracle user's default project.
+The value of the maximum shared memory is set to 4GB, you might want to use a larger value here if you have more memory and swap.
+No reboot is needed, the user will get the new value at their next login.
+
+Now you can also modify the max-sem-ids Parameter:
+ projmod -s -K "project.max-sem-ids=(priv,256,deny)"   user.oracle
+
+assign Oracle to the project:  usermod -K project=group.dba oracle
+
+
+Note 
+
+Use prstat instead of top in the local zone
+
+Check the Paramters as User oracle
+ prctl -i project user.oracle
+ 
+ 
+prstat -j 100
+
+ OR you can do : 
+ prctl <process id>
+
+id -p : check the default project of the current user
+
+plimit  get or set the resource limits of running processes
+
+prstat -Z
+
+echo ::memstat|mdb -k
+
+
+------------- About SVC -------------
+
+To check state of service
+ /usr/bin/svcs -x apache2 
+/usr/bin/svcs jboss 
+
+To control services
+ /usr/sbin/svcadm {clear|enable|disable|restart|refresh|mark maintenance} apache2
+ use svcadm clear after svcadm mark maintenance
+
+
+If jboss run out gemspace,
+/usr/sbin/svcadm mark maintenance
+kill -9
+/usr/sbin/svcadm clear
+
+
+/usr/sbin/svccfg export jboss >   /tmp/forums.xml
+/usr/sbin/svccfg import  < /tmp/forums.xml
+
+
+------------- ZFS pool -------------
+ 
+/usr/sbin/zpool status (global zone)
+/sbin/metastat  (global zone)
+
+Zone tools
+
+search "dtrace toolkit"
+pelleas: cd /opt/DII
+
+
+If grid control tell you sd3, sd4 is busy, how to find out which directory?
+
+Method One:
+ 1) paste -d= <(iostat -x | tail  +3 | awk '{print $1}') <(iostat -nx | tail  +3 | awk '{print "/dev/dsk/"$11}')
+    return value : 
+     sd2=/dev/dsk/c0t0d0
+     sd3=/dev/dsk/c2t0d0
+     sd4=/dev/dsk/c2t1d0
+ 2) /usr/sbin/zpool status: rpool, mirror c2t0d0s0 c2t1d0s0
+ 3) /usr/sbin/zpool list : rpool mountpoints; Note some mountpoints might be in local zone. You wont find it in global zone.   
+ 
+Method Two:
+ 1) iostat -x list device like sd2, sd3, sd4
+ 2) iostat -nx  list device as well c0t0d0, c2t0do, c2t1d0
+ 3) map : sd2 -> c0t0d0, sd3 -> c2t0do, sd4 -> c2t1d0
+ 4) /usr/sbin/zpool status :  rpool, mirror c2t0d0s0 c2t1d0s0
+ 5) /usr/sbin/zfs list : rpool mountpoints; Note some mountpoints might be in local zone. You wont find it in global zone.
+ 
+
+------------- S-N-Double-O-P -------------
+
+On solaris, the "snoop" utility is super-useful for tracking down network wierdness. 
+Snoop allows you to sniff traffic on the system's network interface, but it has a very efficient filter. 
+So even on a busy server like www2, if you can write an efficient filter statement then you can extract packets without having an impact on the system overall. 
+Kind of like tcpflow/tcpdump, but less likely to kill your webserver performance.
+
+e.g. to capture the next 100 packets of traffic going from www2 to the rss expertise system:
+
+snoop -o snoop.out -c 100 tcp dst 137.205.247.48
+
+n.b. you need to run this as root, and you need to be on the global zone - it doesn't work in child zones. 
+It can output either to stdout, or to a wireshark-compatible dump file (as above). 
+Also n.b.; keep an eye on server performance whilst you run this, especially if you leave it running for any length of time. 
+It's usually OK, but if your filter is inefficient and/or you haven't limited the number of packets to be captured, you can get problems.
+
+
+

@@ -1,0 +1,54 @@
+find out shell:  echo $SHELL
+
+/bin/sh    (Bourne shell)
+
+/etc/profile  
+$HOME/.profile
+
+/usr/local/bin/bash (Bourne-Again SHell)
+/etc/profile   
+$HOME/.bash_profile  
+$HOME/.bash_histroy
+$HOME/.bashrc(interactive)  (that mean when you type in bash to change the shell, the .bashrc file will be executeed, the old enviroment still exist. very useful!) 
+$HOME/.profile (if .bash_profile not found)
+$HOME/.bash_logout 
+
+
+
+When BASH starts, it executes following init files:
+Login shell
+   1. /etc/profile
+   2.$HOME/.bash_profile
+   3.$HOME/.bash_login
+   4.$HOME/.profile 
+
+None login shell
+   1./etc/bashrc
+   2.$HOME/.bashrc 
+
+
+/bin/ksh (Lorn shell)
+in order:
+/etc/profile, 
+$HOME/.profile 
+$HOME/.kshrc
+
+/usr/bin/csh
+(in order)
+/etc/.login
+$HOME/.chsrc
+$HOME/.login  
+
+/usr/
+etc/csh.cshrc    all shells  Maintained by system administrator.  
+/etc/csh.login    login shell only  Maintained by system administrator.  
+.tcshrc    all shells  
+.cshrc    if .tcshrc file not found  
+.login    login shell only  
+
+-----------------------------------------------------------------------------------------
+
+'su - username' to execute user's default profile. current user env dispear
+'su -usename' , do not know which file to execute, but definitely not keep the current enviroment nor execute user's profile. 
+'su username', seem keep current envirment and execute the login user's same type shell's profile. this is very like to when currently himselfe type in 'bash' to swith to another shell.
+'su'  change to root, nothing changed!

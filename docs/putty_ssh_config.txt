@@ -1,0 +1,12 @@
+ginseng and hermes both use ssh-2
+
+ginseng is ssh.com's product and is using SSH-2: 
+/usr/local/sbin/sshd2
+
+so you can config the public key authentication according to http://the.earth.li/~sgtatham/putty/0.58/htmldoc/Chapter8.html#pubkey
+1) .ssh2 exist
+2). add the line " Key public_key_name" to authorization
+
+hermes is usign OPenSSH and using SSH-2
+1) .ssh exist (not .ssh2 !)
+2) copy the generated text from puttygen to ./ssh/authorized_keys 

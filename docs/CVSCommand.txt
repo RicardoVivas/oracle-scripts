@@ -1,0 +1,50 @@
+export CVSROOT=:pserver:cuscab@ginseng:/usr/local/cvsrep
+cvs -d:pserver:cuscab@ginseng:/usr/local/cvsrep login
+cvs -d:pserver:cuscab@ginseng:/usr/local/cvsrep checkout oraclescripts
+csv add <name>
+cvs commit <name>
+cvs revmove <name>
+cvs ci <name>
+
+-- for sync with CVS
+cvs update -d -P oraclescripts
+
+-- for add directory:  
+cvs add '/oraclescripts/hon'
+
+-- for commit change:
+cvs ci -m "add one line" /oraclescripts/util/unix-useful
+
+---Command displayed for add directories and file ----
+
+cvs add "/oraclescripts/tier1" "/oraclescripts/tier1/tier2"
+cvs add -kkv "/oraclescripts/tier1/tier2/abc.txt"
+cvs ci -m "3 entries" "oraclescripts/tier1/tier2/abc.txt"
+
+--- Command for create create a new package name and move JDBCVersion.java to it, remove class12.jar and update clas12.jar to another directory ----
+
+cvs add "/oraclescripts/javasrc/version/uk" 
+         "/oraclescripts/javasrc/version/uk/ac" 
+        "/oraclescripts/javasrc/version/uk/ac/warwick" 
+        "/oraclescripts/javasrc/version/uk/ac/warwick/version"
+        
+cvs add -kkv "/oraclescripts/javasrc/version/uk/ac/warwick/version/JDBCVersion.java"
+cvs add -kb "/oraclescripts/javasrc/version/classes12.jar"
+cvs ci -m "move directory" "/oraclescripts/javasrc/version/classes12.jar" 
+                           "/oraclescripts/javasrc/perf/classes12.jar" 
+                           "/oraclescripts/javasrc/version/JDBCVersion.java" 
+                           "/oraclescripts/.classpath" 
+                           "/oraclescripts/javasrc/version/uk/ac/warwick/version/JDBCVersion.java"
+                           
+                           
+It seems CVS do not remove directory. only file !!
+
+-- for update single file:
+cvs update -l -d -P "/oraclescripts/util/user.sql" 
+or
+cvs update -l -d -P  oraclescripts/util/user.sql
+
+-- For query information
+cvs -n -q update
+
+/var/log/maillog, Message-Id is unique

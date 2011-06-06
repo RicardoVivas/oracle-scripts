@@ -1,0 +1,271 @@
+
+Check 32 or 64 bit:
+uname -m 
+
+------------- IO and CPU ------------- 
+
+<first choice>
+/bin/iostat -xzM 5 3 
+                                     x:  extended stats; 
+                                     z:  do not print lines whose underlying  data  values are all zeros)
+                                     M:  in MB/s instead of KB/s
+                       
+                                     Seems no effect:
+                                     c:  percentage; 
+                                     n:  display name; 
+                                     t:  number of characters read and written to terminals per sec; 
+
+                                    
+
+iostat -nxztcpm 3 | grep hy_ora
+
+
+/bin/iostat  -D -p -l6  5 40
+(-D fore each disk, report read/write and percent of utilisation
+ -l  limit
+ -p  For  each  disk,  report  per-partition  statistics in addition to per-device statistics (can be ommited)
+ )
+
+Check disk :   sar -d 5 2
+Check CPU:     sar -u 5 2  ; can also put this in crontab: 20,40 8-17 * * 1-5 /usr/lib/sa/sa1
+Check paging:  sar -p 5 2 
+Check swaping: sar -w 5 2
+
+
+System load: vmstat 5 3 
+mpstat 5 10  note smtx should < 200
+ipcs -b to check whether SGA is fit into a single shared memoery. It's preferable to that.
+pgrep or pgrep java -lf
+pargs
+
+CPU info: psrinfo -v   or prtdiag 
+Check the chip: isainfo -kv
+
+Test sendmail working: mailq
+string : find printable strings in an object or binary file
+sudo -l : to list all sudo commands you have permissions to run
+at -f /tmp/ab.sh now : to run the job 
+atq to check the job queue
+
+
+
+
+------------- Process command -------------
+  
+lsof -i TCP:32768-32867
+lsof -i :<number>
+losf -p <pid>
+ 
+-- To check the discrepancy of df and du,
+losf -a +L1 <partition name, like /package/oracle>
+
+
+/usr/sbin/fuser a.txt to find out which user is using this file
+and 
+pfiles <pid> to get the files opened
+
+Files command
+
+Find empty directory
+
+might need /opt/csw/bin/gfind
+  ﻿find . -type d --empty -exec ﻿rmdir '{}' \;
+
+
+ -- find file in size order and readable format
+ /usr/local/gnu/bin/ls  -lhS
+ 
+ find . -mtime +3  -ok  rm {} \;
+ find . -mtime +3  -exec  rm {} \;
+ 
+ (a: access; m: modify; c: change
+ +3: means have not be modifid within <m> days
+ -3: means have be modified  within <m> days
+ 
+
+ /usr/local/gnu/bin/du  --max-depth=1 -h
+
+ scp  -S  /usr/local/bin/ssh2 /usr/local/bin/ssh2/tmp/*.dmp lock:/tmp
+ or 
+ scp2
+
+
+GNU sed command can edit files in place (makes backup if extension supplied) using -i option. 
+
+ sed -i 's/old-word/new-word/g' *.txt
+
+
+Find out slow http response:
+Use nawk on Solaris, which is better than awk 
+ grep POST localhost_access_log.2007-08-22.log | grep process | awk '$6 > 5000'
+ grep "13:2" formsbuilder-access.log |  awk   '$6 > 50 {print $4, $8}'
+ zgrep formsbuilder /usr/local/apache/logs/access_log.6.gz | awk '$7 >3'| grep POST | grep -v upload
+
+
+
+ /usr/local/gnu/bin/grep -C2 string file
+ /usr/sfw/bin/ggrep -C2  "immediate" /usr/orabackup/log
+ or 
+ /opt/sfw/bin ....
+
+
+compress file:
+
+gtar xvfz abc.tgz
+
+
+Stack trace forums
+su - jboss
+
+svcs -p forums (find out process ID)
+
+/usr/java/bin/jstack 13384  (do this several time at short interval)
+
+To kill the forum
+kill -9 <p_id>
+
+It should be auto restarted by svcs
+
+
+------------- User Permissions -------------
+
+To give a user access permision :  add /etc/passwd and /etc/shadow
+To change a local unix account:  
+passwd -r files <account>
+/bin/passwd -r files  oracle
+
+/etc/shells to control ftp access
+
+/usr/local/bin/chsh: change default shell
+pwent cuscab:  to get full name 
+(strec, stnam may do same thing)
+ 
+change /etc/cron.d/cron.allow to add cron permisison
+quota -v: check quota
+ 
+etc/sudoers: contains all commands user can sudo
+sudo -u oracle <cmd>
+
+Open SSH (display remote appliation onto local host)
+1.On remote server, check /etc/ssh/sshd_config : ForwardX11 (or X11Forwarding) to yes 
+    and ensure remote server has open SSH installed (in all our server, no problem)
+    (The X11DisplayOffset is usually  10 ) 
+  Make sure not to hard code the DISPLAY=x.0 where n = 10,11 .. in the profile 
+2.on client side, ssh -X usr@machine
+3.after login, the $DISPLAY should be automatically set to localhost:10.0 or more
+  If you login from another terminal, it should be automatically set to localhost:11.0
+
+
+Shell Command
+Ctrl A : beginning of line
+Alt + D : delete fro cursor to end of word 
+Ctrl + W : delete from cursorto beginning of word
+
+Ctrl E : endo of line
+ALT + F : move forward one word
+ALT + b move backword one word
+
+Ctrl U : delete  everyting behinde cursort to begin of line
+Ctrl K : delete everything from cursort toend of line
+
+Miscellany
+ 
+ export JBOSS_CONSOLE=/tmp/jboss-cons
+ co -l jbossmq-destinations-service.xml
+ ci -u jbossmq-destinations-service.xml
+ 
+ 
+ format -- p -p -- q
+
+ telnet artemis-rsc  console  (enter two times)
+ to exit: ~. ; then logout
+
+------------- File System -------------
+
+When run the command 
+duplicate target database for standby dorecover; 
+RMAN report an error:
+ORA-19870: error reading backup piece /usr/orabackup/rman/9rid2vkg_1_1
+ORA-19505: failed to identify file "/usr/orabackup/rman/9rid2vkg_1_1"
+ORA-27054: NFS file system where the file is created or resides is not mounted with correct options
+
+The Metalink Note:338086.1 give some explaination. 
+As of Oracle 10.2 the IO interface layer in Oracle tries
+        to check that the mount options of any NFS mounted disk
+        used have mount options which ensure that the NFS volume
+        is safe to use as incorrectly mounted NFS volumes can 
+        result in data corruption problems.
+        
+        
+Then I mounted 
+mount -f nfs -o hard,fg,rsize=32768,wsize=32768 puma-private:/vol/hy_oracle /package/oracle
+
+mount -f nfs -o vers=4,proto=tcp,hard,rsize=32768,wsize=32768 nike:/vol/vector_ora1 /usr/local/oracle/oradata1
+
+
+/etc/vfstab : make nfs mount survive reboot
+nfsstat -m : display nfs info
+
+from hermes, run: 
+rsync -RSCauvz -e 'ssh -x' .   medora:/usr/local/apache/htdocs/cg/.
+Use -RSCauvzn to test first
+
+1.unmount -f fileid
+2.mount fileid dest_dir
+3. edit /etc/vfstab file manaually
+
+check the cron job;
+/var/cron/log
+
+on pelleas-oracle, wget is in /opt/csw/bin/wget
+
+-- Delete empty directories
+/opt/csw/bin/gfind . -type d -empty -exec rmdir "{}" \;
+
+
+To test Apache config:
+ /usr/local/apache2/bin/apachectl configtest
+
+
+
+------------- Vi command -------------
+
+Ctrl-G   Display line number of cursor
+
+
+
+
+------------- Show all the clients connecting to port 80 (be suspicious if >15 connections per client IP address) -------------
+
+netstat -na | grep '\.80 ' | grep EST | sort -k2
+
+n.b. (a) note the space after '80', (b) if using this on WSOS or Files.Warwick replace "grep '\.80 '" with "egrep '\.80 |\.443 ' " to pick up SSL requests too
+
+
+How's the server?
+
+vmstat 3
+
+Low free mem is nothing to worry about, as the ZFS cache will gobble up any spare memory,but if there's any scanning going on (SR column > 0), that's bad.
+
+iostat -xtcnmpz 3 (ya, rly)
+
+devices more that about 50% busy are likely to slow things down.
+
+prstat is better than top. top lies, in zones.
+
+prstat -L {pid} will give you a thread-level view of a process. This is super-useful for working out if jboss has just one busy thread, or lots.
+prstat -Z from the global zone gives you a zone-by-zone breakdown of resource usage, which is occasionally handy on the multi-purpose boxes (maia/hyperion)
+
+
+JIRAs that might have useful clues, especially if you're fighting apache:
+http://bugs.elab.warwick.ac.uk/jira/browse/SSO-670 (apache problems on WSOS, aparently DNS-related)
+http://bugs.elab.warwick.ac.uk/jira/browse/SBTWO-2379 (apache problems on SB2, apache leaking RAM / running out of swap)
+
+
+-- Connect to new webdev file server -----
+
+smb://cuscab@kif.ads.warwick.ac.uk/webdev/
+
+
+

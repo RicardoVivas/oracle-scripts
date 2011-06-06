@@ -1,0 +1,150 @@
+# From Oracle Linux 5 DVD
+cd /media/cdrom/Server
+rpm -Uvh binutils-2.*
+rpm -Uvh elfutils-libelf-0.*
+rpm -Uvh elfutils-libelf-devel-*
+rpm -Uvh gcc-4.*
+rpm -Uvh gcc-c++-4.*
+rpm -Uvh glibc-2.*
+rpm -Uvh glibc-common-2.*
+rpm -Uvh glibc-devel-2.*
+rpm -Uvh glibc-headers-2.*
+rpm -Uvh ksh-2*
+rpm -Uvh libaio-0.*
+rpm -Uvh libgcc-4.*
+rpm -Uvh libstdc++-4.*
+rpm -Uvh libstdc++-devel-4.*
+rpm -Uvh make-3.*
+
+
+rpm -Uvh compat-libstdc++-33* (disk 3)
+rpm -Uvh libaio-devel-0.* (disk 3)
+rpm -Uvh sysstat-7.*      (disk 4)
+rpm -Uvh unixODBC-2.*   ( in disk2)
+rpm -Uvh unixODBC-devel-2.* (disk 3)
+
+# For Oracle Linux, use relevant versions of the following packages from your media.
+rpm -Uvh 
+oracleasm-2.6.18-194.el5-2.0.5-1.el5.x86_64.rpm   (disk5)
+oracleasm-support-2.1.3-1.el5.x86_64.rpm (disk 3)
+and
+oracleasmlib-2.0.4-1.el5.x86_64.rpm (cannot found. download and put in /mnt)
+
+
+
+mkdir -p $HOME/VirtualBox\ VMs/harddisks
+cd $HOME/VirtualBox\ VMs/harddisks
+
+VBoxManage createhd --filename asm1.vdi --size 5120 --format VDI --variant Fixed
+VBoxManage createhd --filename asm2.vdi --size 5120 --format VDI --variant Fixed
+VBoxManage createhd --filename asm3.vdi --size 5120 --format VDI --variant Fixed
+VBoxManage createhd --filename asm4.vdi --size 5120 --format VDI --variant Fixed
+VBoxManage createhd --filename asm5.vdi --size 5120 --format VDI --variant Fixed
+
+VBoxManage storageattach rac1 --storagectl "SATA Controller" --port 1 --device 0 --type hdd --medium asm1.vdi --mtype shareable
+VBoxManage storageattach rac1 --storagectl "SATA Controller" --port 2 --device 0 --type hdd --medium asm2.vdi --mtype shareable
+VBoxManage storageattach rac1 --storagectl "SATA Controller" --port 3 --device 0 --type hdd --medium asm3.vdi --mtype shareable
+VBoxManage storageattach rac1 --storagectl "SATA Controller" --port 4 --device 0 --type hdd --medium asm4.vdi --mtype shareable
+VBoxManage storageattach rac1 --storagectl "SATA Controller" --port 5 --device 0 --type hdd --medium asm5.vdi --mtype shareable
+
+ # Make shareable.
+VBoxManage modifyhd asm1.vdi --type shareable
+VBoxManage modifyhd asm2.vdi --type shareable
+VBoxManage modifyhd asm3.vdi --type shareable
+VBoxManage modifyhd asm4.vdi --type shareable
+VBoxManage modifyhd asm5.vdi --type shareable
+
+
+Two version of kernel 
+2.6.18-194 can use oracleasm -update-driver to fetch the correct version of all oracleasm libs
+2.6.18-238.12.1.0.1.el5 has no matching driver
+
+2.6.32-71.el6.x86_64 on larzuk
+2.6.38-8-generic on ubuntu 11.04
+
+
+
+/usr/sbin/oracleasm createdisk DISK1 /dev/sdb1
+/usr/sbin/oracleasm createdisk DISK2 /dev/sdc1
+/usr/sbin/oracleasm createdisk DISK3 /dev/sdd1
+/usr/sbin/oracleasm createdisk DISK4 /dev/sde1
+/usr/sbin/oracleasm createdisk DISK5 /dev/sdf1
+
+/usr/sbin/oracleasm scandisks
+/usr/sbin/oracleasm listdisks
+
+mkdir -p $HOME/VirtualBox\ VMs/rac2
+VBoxManage clonehd $HOME/VirtualBox\ VMs/rac1/rac5-1.vdi $HOME/VirtualBox\ VMs/rac2/rac5-2.vdi
+
+Create the "rac2" virtual machine in VirtualBox in the same way as you did for "rac1", 
+1) using an existing rac5-2.vdi virtual hard drive.
+2) add the second network adaptor as you did on the "rac1" VM. When the VM is created, attach the shared disks to this VM.
+
+cd $HOME/VirtualBox\ VMs/harddisks
+$
+$ # All versions (can omit "--mtype shareable" for versions below 4.0.0)
+VBoxManage storageattach rac2 --storagectl "SATA Controller" --port 1 --device 0 --type hdd --medium asm1.vdi --mtype shareable
+VBoxManage storageattach rac2 --storagectl "SATA Controller" --port 2 --device 0 --type hdd --medium asm2.vdi --mtype shareable
+VBoxManage storageattach rac2 --storagectl "SATA Controller" --port 3 --device 0 --type hdd --medium asm3.vdi --mtype shareable
+VBoxManage storageattach rac2 --storagectl "SATA Controller" --port 4 --device 0 --type hdd --medium asm4.vdi --mtype shareable
+VBoxManage storageattach rac2 --storagectl "SATA Controller" --port 5 --device 0 --type hdd --medium asm5.vdi --mtype shareable
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+-- background
+
+
+
+
+
+
+
+
+
+
+
+
+share folder with virtualbox
+
+sharename="whatever.you.want.to.call.it"; 
+sudo mkdir /mnt/$sharename \
+sudo chmod 777 /mnt/$sharename \ 
+sudo mount -t vboxsf -o uid=1000,gid=1000 $sharename /mnt/$sharename \
+ln -s /mnt/$sharename $HOME/Desktop/$sharename

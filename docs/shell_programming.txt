@@ -1,0 +1,7 @@
+[ condition ] : note there is space on both side of the condition
+compare string 
+[ "$variable"="eclipse" ] : use double quote is a safe way
+the operators include: = !=  -z (null) -n (not null)
+Compare number:
+[ "$vairable" operator "value"] 
+oprators include: -eq -ne -gt -le -lt -gt
