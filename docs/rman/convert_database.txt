@@ -1,0 +1,20 @@
+When the RMAN CONVERT DATABASE step is to be performed on the source platform, the process for transporting databases across platforms works as follows:
+
+
+      In preparation for transporting the database, the source database must be opened read-only.
+
+      SQL> STARTUP MOUNT;
+      SQL> ALTER DATABASE OPEN READ ONLY;
+
+#
+
+Use the CHECK_DB function in the DBMS_TDB package as described in "Preparing for CONVERT DATABASE: Using the DBMS_TDB Package" to ensure that no conditions exist that would prevent the transport of the database, such as incorrect compatibility settings, in-doubt or active transactions, or incompatible endian formats between the source platform and the desired destination platform.
+
+set serveroutput on
+declare
+    db_ready boolean;
+  begin
+    /* db_ready is ignored, but with SERVEROUTPUT set to ON any 
+     * conditions preventing transport will be output to console */
+    db_ready := dbms_tdb.check_db('Microsoft Windows IA (32-bit)', dbms_tdb.skip_none);
+  end;

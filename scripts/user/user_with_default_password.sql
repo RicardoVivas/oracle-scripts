@@ -1,0 +1,1 @@
+select a.username, b.account_status from dba_users_with_defpwd a, dba_users b where a.username = b.username

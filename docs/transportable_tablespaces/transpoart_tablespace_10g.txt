@@ -1,0 +1,71 @@
+create user to be imported on target machine. Grant role webdev to it.
+
+-- Source machine --
+
+
+Step 1: Pick a Self-Contained Set of Tablespaces
+
+The following statement can be used to determine whether tablespaces sales_1 and sales_2 are self-contained, 
+with referential integrity constraints taken into consideration (indicated by TRUE).
+
+EXECUTE DBMS_TTS.TRANSPORT_SET_CHECK('sales_1,sales_2', TRUE);
+SELECT * FROM TRANSPORT_SET_VIOLATIONS;
+
+Step 2: Generate a Transportable Tablespace Set
+   1.Make all tablespaces in the set you are copying read-only.
+
+    SQL> ALTER TABLESPACE sales_1 READ ONLY;
+    SQL> ALTER TABLESPACE sales_2 READ ONLY;
+
+   2.Invoke the Data Pump export utility on the host system and specify which tablespaces are in the transportable set.
+
+     expdp  DUMPFILE=sales.dmp DIRECTORY=expdir  TRANSPORT_TABLESPACES = sales_1,sales_2 TRANSPORT_FULL_CHECK=Y
+             
+
+--------On target machine ---------------------------------------
+
+Step 3: Transport the tablespace set in the target machine
+
+      copy tablespace files to destination;
+      Copy dumpfile to same Oracle directory 
+            
+      Copy the datafiles to the physical standby database. The data files must have the same path name on the primary and standby databases unless 
+      the DB_FILE_NAME_CONVERT database initialization parameter has been configured. 
+
+
+Step 4: Plug In the Tablespace Set
+
+
+   1.Plug in the tablespaces and integrate the structural information using the Data Pump Import utility, impdp:
+
+   impdp / DUMPFILE=rcl.dmp DIRECTORY=pump_dir  TRANSPORT_DATAFILES=/oradata/romulus/sales_1.dbf,/oradata/romulus/sales_2.dbf REMAP_SCHEMA=(dcranney:smith) REMAP_SCHEMA=(jfee:williams)
+
+      After this statement executes successfully, all tablespaces in the set being copied remain in read-only mode. 
+      Check the import logs to ensure that no error has occurred.
+
+    
+   2.Put the tablespaces into read/write mode as follows:
+     ALTER TABLESPACE sales_1 READ WRITE;
+   
+   3. Change the user's default tablespace. I don't think you need to grant unlimited quota on the tablespace. But wont hurt to do so.
+
+
+More to consider :
+1. transporting the tablespace set to a platform different to  the source platform. 
+2. transporting a tablespace of a different block size 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

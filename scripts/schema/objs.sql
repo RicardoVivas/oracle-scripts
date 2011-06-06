@@ -1,0 +1,1 @@
+select owner, segment_type, round(sum(bytes)/1024/1024,1) as MB from dba_segments where owner like '&schema_name' GROUP BY owner, segment_type ORDER BY 1, 2

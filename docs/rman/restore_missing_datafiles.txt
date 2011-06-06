@@ -1,0 +1,35 @@
+See http://download-uk.oracle.com/docs/cd/B19306_01/backup.102/b14191/rcmrecov006.htm#sthref753
+
+
+Recovering a Lost Datafile Without a Backup: Example
+
+RMAN can handle lost datafiles without user intervention during restore and recovery. When a datafile is lost, the possible cases can be classified 
+as follows:
+
+    * The control file knows about the datafile, that is, the user backed up the control file after datafile creation, but 
+      the datafile itself is not backed up. If the datafile record is in the control file, then RESTORE creates the 
+      datafile in the original location or in a user-specified location (for example, with SET NEWNAME). 
+      The RECOVER command can then apply the necessary logs to the datafile.
+    * The control file does not have the datafile record, that is, the user did not back up the control file after datafile creation. 
+      During recovery, the database will detect the missing datafile and report it to RMAN, which will create a new datafile and 
+      continue recovery by applying the remaining logs. If the datafile was created in a parent incarnation, 
+      it will be created during restore or recover as appropriate.
+
+In this example, the following sequence of events occurs:
+
+   1.You make a whole database backup of your ARCHIVELOG mode database.
+   2.You create a tablespace history containing a single datafile called /mydb/history01.dbf.
+   3.You populate the newly created datafile with data.
+   4.You archive all the active online redo logs.
+   5.A user accidentally deletes the datafile history01.dbf from the operating system before you have a chance to back it up.
+
+In this case, the current control file knows about the datafile. To restore and recover the datafile, start RMAN, connect to the target database, and then enter the following commands at the RMAN prompt:
+
+# take the tablespace with the missing datafile offline
+SQL "ALTER TABLESPACE history OFFLINE IMMEDIATE";
+# restore the tablespace even though you have no backup
+RESTORE TABLESPACE history;
+# recover tablespace
+RECOVER TABLESPACE history;
+# bring the recovered tablespace back online
+SQL "ALTER TABLESPACE history ONLINE";

@@ -1,0 +1,38 @@
+The following parameters to must be consistent across execution environments if you want to use the stored plan:
+
+QUERY_REWRITE_ENABLED
+STAR_TRANSFORMATION_ENABLED
+OPTIMIZER_FEATURES_ENABLE
+
+
+To create
+parameter: CREATE_STORED_OUTLINES = true | false | category
+  to start, set to true or category; to stop, ste to false;
+
+ sb;
+alter system set CREATE_STORED_OUTLINES = false;
+
+schmeas has : CREATE ANY OUTLINE 
+
+To use:
+set the system parameter USE_STORED_OUTLINES to true or to a category name
+
+alter system set use_stored_outlines = sb;
+alter system set use_stored_outlines = false;
+
+To check it is used:
+
+SELECT OUTLINE_CATEGORY, OUTLINE_SID
+  FROM V$SQL 
+  WHERE SQL_TEXT LIKE 'SELECT COUNT(*) FROM emp%';
+  
+To view outline data:
+
+SELECT NAME, SQL_TEXT 
+  FROM USER_OUTLINES 
+  WHERE CATEGORY='mycat';
+
+select hint from dba_outlines where name='';
+  
+to drop outline:
+dro outine <name>

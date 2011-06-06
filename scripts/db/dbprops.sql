@@ -1,0 +1,1 @@
+select * from database_properties order by property_name

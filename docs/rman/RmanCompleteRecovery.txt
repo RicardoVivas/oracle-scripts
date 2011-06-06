@@ -1,0 +1,104 @@
+1. Delete spfile<sid>.ora, orapw<sid> lk<SID>, control files, redo logs, archives, data files
+2. Instance is still running. 
+3. Try to rman target / catalog <connectionString>, it failed and report "cannot open the specified controlfile"
+4. Connect as sysdba, shutdown immediate and failed, reporting "cannot open the specified controlfile"
+5. ABORT:  shutdown abort and rman target / catalog <connectionString>, succeed
+
+6. DBID:   Find out the DBID from rc_database in the catalog.
+
+7. Restore spfile
+    RMAN> SET DBID=<number> ; 
+    RMAN> startup nomount; 
+    RMAN> restore spfile;
+    
+    a)you can create a link to the locations. this is much quicker than step b) 
+    b) alternatively  create pfile from this spfile and modify some parameters, like file location and 
+       cache size. Then re-create spfile;
+    c) alter database set control_files=('c1.ctl',c2.ctl','c3.ctl') scope=spfile;
+       alter system   set  db_file_name_convert=('/old1','/new1','old2','/new2') scope=spfile;
+       alter system   set log_file_name_convert=('/old1','/new1','old2','/new2') scope=spfile;
+       
+8. Restore controlfile: 
+    RMAN> shutdown abort ; 
+    RMAN> startup nomount(it will use the restored spfile and restore correct controlfile name);
+    RMAN> restore controlfile;
+    or
+    RMAN> restore controlfile from autobackup;
+    
+9. RMAN> alter database mount; 
+     If failed and report error opening orapw file, create one: orapwd file=<home>/dbs/orapw<sid> password=<pass>
+     
+10. Restore database: 
+    
+    RMAN> report schema (It will display this info after db is mounted. Control file has such information.)
+    
+    Complete restore: 
+    RMAN> restore database;
+    
+    To restore to a different location:
+    run{
+        set newname for datafile '/oracle/oradata/<sid>/system01.dbf' to '/oracle3/oradata/<sid>/system01.dbf';
+		set newname for datafile '/oracle/oradata/<sid>/undotbs01.dbf' to '/oracle3/oradata/<sid>/undotbs01.dbf';
+		set newname for datafile '/oracle/oradata/<sid>/indx01.dbf' to '/oracle3/oradata/<sid>/indx01.dbf';
+		set newname for datafile '/oracle/oradata/<sid>/tools01.dbf' to '/oracle3/oradata/<sid>/tools01.dbf';
+		set newname for datafile '/oracle/oradata/<sid>/users01.dbf' to '/oracle3/oradata/<sid>/users01.dbf';
+		set newname for datafile '/oracle/oradata/<sid>/nagty01.dbf' to '/oracle3/oradata/<sid>/nagty01.dbf';
+		set newname for datafile '/oracle/oradata/<sid>/progspec01.dbf' to '/oracle3/oradata/<sid>/progspec01.dbf';
+		restore database;
+		switch datafile all;      
+       }
+		
+	   The sequence is: restore, switch, recover.
+ 
+   Incomplete restore:
+     restore database until time "to_date('21/07/08 9:00:00','dd/mm/yy hh24:mi:ss')";
+     
+11. Recover database:
+
+    Complete recovery:
+    RMAN> recover database 
+    
+    if the archive directory does not exists, rman will restore as archive_1_7890_444444.dbf. Otherwise, the name will be  ./archive/1_780_44444.dbf.
+    You can copy more archive logs to this position and issue "recover database" again and they will be used automatically.
+
+    Incomplete recovery:  
+    To find out the archivelog back in the backupset: list backup of archivelog  { from time='sysdate -7' | all };
+    recover database until sequence 4 thread 1; ( "until" implies excluding...)
+    recover database until time "to_date('22/10/08 10:00:00','dd/mm/yy hh24:mi:ss')"; 
+    
+12. OPEN DB: 
+
+     With Complete Recovery when online logs and all archivelogs are intact:
+      RMAN> alter database open;
+     
+     With incomplete recovery:
+      RMAN>  alter database open resetlogs;
+       reporting  "new incarnation of database registered in recovery catalog starting full resync of recovery catalog"
+       Remember that we do not have online redo logs before this step. Resetlog will create logs
+       
+13. Shutdown immediate; do a level 0 backup;
+
+
+Note:
+
+*. When do "recover database", it seems cannot find out where to stop. It always recover that last archive log from backupset. 
+   Then it go for the next, which is never exist.
+   This is weird. So have to use "until sequence <num> thread 1"
+*. Always do a level n backup after the structure change, i.e. add new tablespace. It seems level 1 will do.
+*. Always shutdown DB then do a level 0 backup after open with resetlogs. Do not do backup without restart db.
+*. It maybe safe to export rman schema before recover. After recover failed, you can import backup and do a fresh recovery again.
+*. Enable control file autobackup will automatically enable spfile autobackup  
+
+  
+
+Q: When you have to do incomplete recovery?
+A: Lost of online redo logs, archivelogs. 
+   Lose of control files does not necessarily means that you have to do incomplete recovery. 
+   As long as the online logs are intact, you can re-create the controlfile.
+
+
+
+
+
+
+

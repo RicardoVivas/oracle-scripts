@@ -1,0 +1,123 @@
+-- Trace --
+
+either:
+find out the opsid first: top or ps -ef 
+sqlplus > ORADEBUG SETOSPID 34345
+to start
+sqlplus > oradebug event 10046 trace name context forever, level 12
+sqlplus > oradebug event 10046 trace name context off;
+
+
+or 
+
+To enable event 10046 level 8 in a session with SID 9 and serial number 29 use
+    EXECUTE dbms_system.set_ev (9,29,10046,8,'');
+To disable event 10046 in the same session use
+    EXECUTE dbms_system.set_ev (9,29,10046,0,'');
+
+10053
+    EXECUTE dbms_system.set_ev (9,29,10053,1,'');
+    EXECUTE dbms_system.set_ev (9,29,10046,0,'');
+    
+    
+    
+  
+
+-----------
+
+http://julian.dyke.users.btopenworld.com/com/Diagnostics/Events/Events.html
+
+introduction
+
+There are four types of numeric events
+    * Immediate dumps
+    * Conditional dumps
+    * Trace dumps
+    * Events that change database behaviour
+
+Every event has a number which is in the Oracle error message range e.g. event 10046 is ORA-10046
+Each event has one or more levels which can be
+
+    * range e.g. 1 to 10
+    * bitmask e.g. 0x01 0x02 0x04 0x08 0x10
+    * flag e.g. 0=off; 1=on
+    * identifier e.g. object id, memory address etc
+
+Note that events change from one release to another. As existing events become deprecated and then obsolete, the event number is frequently reused for a new event. 
+Note also that the message file sometimes does not reflect the events in the current release.
+Many events change the behaviour of the database. Some testing events may cause the database to crash. 
+Never set an event on a production database without obtaining permission from Oracle support. 
+In addition, never set an event on a development database without first making a backup.
+
+Enabling Events
+
+Events can be enabled at instance level in the init.ora file using
+    event='event trace name context forever, level level';
+
+Multiple events can be enabled in one of two ways
+1 - Use a colon to separate the event text e.g.
+    event = "10248 trace name context forever, level 10:10249 trace name context forever, level 10"
+
+2 - List events on consecutive lines e.g.
+    event = "10248 trace name context forever, level 10"
+    event = "10249 trace name context forever, level 10"
+
+Note that in some versions of Oracle, the keyword "event" must be in the same case (i.e. always uppercase or always lowercase).
+Events can also be enabled at instance level using the ALTER SYSTEM command
+
+    ALTER SYSTEM SET EVENTS
+    'event trace name context forever, level level';
+
+Events are disabled at instance level using
+
+    ALTER SYSTEM SET EVENTS
+    'event trace name context off';
+
+Events can also be enabled at session level using the ALTER SESSION command
+
+    ALTER SESSION SET EVENTS
+    'event trace name context forever, level level';
+
+Events are disabled at session level using
+
+    ALTER SESSION SET EVENTS
+    'event trace name context off';
+
+Events can be enabled in other sessions using ORADEBUG
+To enable an event in a process use
+
+    ORADEBUG EVENT event TRACE NAME CONTEXT FOREVER, LEVEL level
+
+For example to set event 10046, level 12 in Oracle process 8 use
+    ORADEBUG SETORAPID 8
+    ORADEBUG EVENT 10046 TRACE NAME CONTEXT FOREVER, LEVEL 12
+
+To disable an event in a process use
+    ORADEBUG EVENT event TRACE NAME CONTEXT OFF
+
+To enable an event in a session use
+    ORADEBUG SESSION_EVENT event TRACE NAME CONTEXT FOREVER, LEVEL level
+
+For example
+
+    ORADEBUG SESSION_EVENT 10046 TRACE NAME CONTEXT FOREVER, LEVEL 12
+
+To disable an event in a session use
+
+    ORADEBUG SESSION_EVENT event TRACE NAME CONTEXT OFF
+
+Events can be also enabled in other sessions using DBMS_SYSTEM.SETEV
+The SID and the serial number of the target session must be obtained from V$SESSION.
+
+For example to enable event 10046 level 8 in a session with SID 9 and serial number 29 use
+    EXECUTE dbms_system.set_ev (9,29,10046,8,'');
+
+To disable event 10046 in the same session use
+    EXECUTE dbms_system.set_ev (9,29,10046,0,'');
+    
+    
+    
+    
+    
+    
+  

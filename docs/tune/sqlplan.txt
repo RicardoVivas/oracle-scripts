@@ -1,0 +1,15 @@
+optimizer_capture_sql_plan_baselines
+
+select * from dba_sql_plan_baselines order by created desc;
+
+
+For new plans:
+If found match in baseline, the plan is considered acceptable.
+If no match found, 
+
+1) If has accepted plans,  compare cost with them.  
+ If new plan is big, then will use plan in baseline;
+ If new plan is low, then will use the lowest plan and store new plan in baseline but not accpeted yet.
+ 
+2) If no accepted  plan, will use and accept it.
+

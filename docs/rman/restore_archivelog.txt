@@ -1,0 +1,7 @@
+list backup of archivelog  { from time='sysdate -7' | all };
+
+DELETE NOPROMPT ARCHIVELOG UNTIL  time= 'sysdate -2';
+
+
+
+ restore archivelog from logseq=100 until logseq=110;

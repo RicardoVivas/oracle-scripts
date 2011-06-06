@@ -1,0 +1,20 @@
+Tools name accord with the page : http://www.petefinnigan.com/tools.htm
+
+OSScanner: 
+
+Oracle Security Check (from  ensync Solutions / OraSecurityChk): 
+       Very useful form check default password
+
+Oracle Auditing Tools ( from Patrik Karlsson / ose): 
+      the otnsctl.bat display awful lot of infromation about the server. Very alarming.
+
+Oracle listener security check version 1.0 ( lsnrcheck.exe) 
+       very simple and display whether password is set
+   
+Oracle SID Enumeration (  	 Patrik Karlsson:) : seems not good 
+
+p6spy  ( 	 p6spy.com):
+   not test it yet
+   
+tnscmd (James Abendschan):
+  it has a very good document about the vulnerability of lsnrctl

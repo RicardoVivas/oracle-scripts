@@ -1,0 +1,51 @@
+
+
+Urltra Search : http://machine:5620/ultrasearch
+Ultra Search Adminstrattion: http://machine:5620/ultrasearch/admin
+isql*plus : http://machine:5560/isqlplus
+isql*plus dba: http://machine:5560/isqlplus/dba
+http://host.domain:5500/em/
+oracle http server: http://machine:7777
+
+
+
+1. use rman to delete recovery area files or os delete + rman crosscheck + rman delete
+2. log_archive_dest_state_<1 .. 10> is enabled by default , why?
+
+
+data dump
+need create a directory in database and grant read/write permission on this directory to user.
+if a user has imp_full_database priviedge, then automatically has the permission on directory.
+set DATA_PUMP_DIR enviroment variable is you do not want to specify direcoty on the command line.
+
+
+---------Flashback --------------------
+alter table <name> enable row movement
+flashback table <name> to timestamp|scn|before drop
+
+to flashback database, the database must in mount mode.
+flashdatabase to scn <number>; open dataabaes resetlogs;
+You can also:
+flashdatabase to scn <number>; export the table-level data;
+recover database ; import back the data.
+
+enable ASMM by setting sga_target; shared(large,java)_pool_size, shared_pool_size are set to 0, if not, then the value  be used as the floor 
+for the parameters.
+v$sga_dynamic_components
+
+
+purge user_recyclebin;
+purge dba_recyclebin;
+purge recyclebin;
+or
+drop table t1 purge;
+
+What Are Those ocssd.bin Processes?
+Oracle Cluster Synchronization Services (OCSSD) is a component of Oracle Cluster Ready Services (CRS) and is required for RAC 
+and single-instance databases using ASM. It is installed by default, uses very few system resources, and is configured in /etc/inittab. 
+These processes are started automatically each time the system boots. Oracle recommends against disabling OCSSD, even if you are not running ASM.
+
+
+Starting and Stopping iSQL*Plus:
+$ isqlplusctl start
+$ isqlplusctl stop

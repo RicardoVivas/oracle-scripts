@@ -1,0 +1,45 @@
+
+Step 2: Pick a Self-Contained Set of Tablespaces
+
+The following statement can be used to determine whether tablespaces cms and cmsindx are self-contained, with referential integrity constraints 
+taken into consideration (indicated by TRUE).
+
+EXECUTE DBMS_TTS.TRANSPORT_SET_CHECK('CMS,cmsindx', TRUE);
+SELECT * FROM TRANSPORT_SET_VIOLATIONS;
+
+Step 3: Generate a Transportable Tablespace Set
+   1.Make all tablespaces in the set you are copying read-only.
+
+     ALTER TABLESPACE cms READ ONLY;
+     ALTER TABLESPACE cmsindx READ ONLY;
+
+   2.Invoke the Data Pump export utility on the host system and specify which tablespaces are in the transportable set.
+     exp  file=/tmp/cms.dmp TRANSPORT_TABLESPACE=y TABLESPACES=(cms,cmsindx)  TTS_FULL_CHECK=Y
+     At the user prompt, input :  / as sysdba
+     
+    copy all files to destination
+    
+Step 5: Plug In the Tablespace Set
+ 
+    do not forget to create user cmsas first
+
+   1.Plug in the tablespaces and integrate the structural information using the Data Pump Import utility, impdp:
+
+    imp  FILE=/tmp/cms.dmp        TRANSPORT_TABLESPACE=y  
+         TTS_OWNERS=(sb2,sb2mig,cms_test) 
+         FROMUSER=(sb2,sb2mig,cms_test)   TOUSER=(sb2,sb2mig,cms) 
+         TABLESPACES=(cms,cmsindx)  
+         DATAFILES=('/database/oradata/sb/cms01.dbf','/database/oradata/sb/cms02.dbf','/database/oradata/sb/cmsindx01.dbf','/database/oradata/sb/cmsindx02.dbf')
+
+    imp  FILE=/tmp/cms.dmp        TRANSPORT_TABLESPACE=y  
+         TTS_OWNERS=(sb2,sb2mig,cms_test) 
+         FROMUSER=(sb2,sb2mig,cms_test)   TOUSER=(sb2,sb2mig,cms) 
+         TABLESPACES=(cms,cmsindx)  
+         DATAFILES=('/sb2-dev/oracle/oradata/warch210/cms01.dbf','/sb2-dev/oracle/oradata/warch210/cms02.dbf','/sb2-dev/oracle/oradata/warch210/cmsindx01.dbf','/sb2-dev/oracle/oradata/warch210/cmsindx02.dbf')
+
+    
+   2.If required, put the tablespaces into read/write mode as follows:
+      ALTER TABLESPACE cms READ WRITE;
+      ALTER TABLESPACE cmsindx READ WRITE;
+
+

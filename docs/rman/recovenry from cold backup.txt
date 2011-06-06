@@ -1,0 +1,14 @@
+1. set ORACLE_SID
+2. RMAN target /
+3. set DBID = J123455;
+4. startup nomount;
+5.  restore spfile from  '/usr/orabackup/chusuk/rman/df_CHUSUK_7_1';
+6. stop and startup nomount again
+7.  restore controlfile from '/usr/orabackup/chusuk/rman/df_CHUSUK_7_1';
+8. alter database mount;
+9. 
+
+rman backup log is quite useful! It stores:
+a) the DBID
+b) the file name that contains the controlfile, and spfile. 
+   It's always in the last file of one set of backup.

@@ -1,0 +1,28 @@
+dbv file=/oracle-2/oradata/drooper/forums01.dbf
+
+
+DBVERIFY - Verification starting : FILE = /oracle-2/oradata/drooper/forums01.dbf
+
+DBV-00200: Block, dba 21090999, already marked corrupted
+DBV-00200: Block, dba 21162984, already marked corrupted
+
+
+DBVERIFY - Verification complete
+
+Total Pages Examined         : 393216
+Total Pages Processed (Data) : 116995
+Total Pages Failing   (Data) : 0
+Total Pages Processed (Index): 90446
+Total Pages Failing   (Index): 0
+Total Pages Processed (Other): 102738
+Total Pages Processed (Seg)  : 0
+Total Pages Failing   (Seg)  : 0
+Total Pages Empty            : 83037
+Total Pages Marked Corrupt   : 0
+Total Pages Influx           : 0
+Highest block SCN            : 40577662 (0.40577662)
+
+
+ Error 1578 encountered while recovering transaction (12, 25) on object 17104.
+Reread of rdba: 0x0141d2b7 (file 5, block 119479) found same corrupted data
+ 

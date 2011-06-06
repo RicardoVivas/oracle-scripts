@@ -1,0 +1,12 @@
+RUN
+{  
+  ALLOCATE CHANNEL dev1 DEVICE TYPE DISK;  
+  SQL "ALTER TABLESPACE tbs_1 OFFLINE IMMEDIATE";  
+  SET NEWNAME FOR DATAFILE '/disk7/oracle/tbs11.f' TO '/disk9/oracle/tbs11.f';  
+  RESTORE TABLESPACE tbs_1; 
+  SWITCH DATAFILE ALL;  
+  RECOVER TABLESPACE tbs_1;  
+  SQL "ALTER TABLESPACE tbs_1 ONLINE";  
+}
+
+The sequence is : restore, switch, recover

@@ -1,0 +1,23 @@
+
+if standard port, instance will automatically register to listener.
+
+if non-standar port, 
+Then spcify local_listener parameter:
+alter system set local_listener='(address_list=(address=(protocol=tcp)(host=ecaz)(port=1521)))'
+
+
+IMP TRANSPORT_TABLESPACE=y FILE=/tmp/oracle/tt.dmp
+    DATAFILES=('/oracle/oradata/warch2/cms01.dbf','/oracle/oradata/warch2/cmsindx01.dbf','/oracle/oradata/warch2/cmsindx02.dbf')
+    TABLESPACES=(cms,cmsindx) TTS_OWNERS=(cms)
+    FROMUSER=(cms) TOUSER=(cms50)
+
+    
+    
+set a password to the listenter:
+
+lsnrctl> set current_listener
+lsnrctl> change_password
+lsnrctl> set password
+lsnrctl>  save_config
+
+when you shutdown, status listener, do set password to input password first

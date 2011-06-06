@@ -1,0 +1,26 @@
+--Check how far can flashback
+SELECT OLDEST_FLASHBACK_SCN, OLDEST_FLASHBACK_TIME, RETENTION_TARGET, FLASHBACK_SIZE, ESTIMATED_FLASHBACK_SIZE FROM V$FLASHBACK_DATABASE_LOG ;
+
+-- 
+flashback database to timestamp (sysdate -2);
+FLASHBACK DATABASE TO timestamp to_timestamp('07-Mar-2005 12:38:18', 'DD-Mon-YYYY HH24:MI:SS');
+FLASHBACK DATABASE TO timestamp to_timestamp('03-12-2008 13:00:00', 'DD-MM-YYYY HH24:MI:SS');
+FLASHBACK DATABASE TO scn  23455;
+ 
+-- you can  to check the content 
+alter database open read only
+
+-- Once satisfied, 
+alter database open resetlogs; 
+ 
+ 
+select * from table versions between timestamp sysdate - 1 and sysdate where id = 1;
+
+alter system set undo_retention = 3600;
+alter talbespace undo retention guartantee;
+
+
+
+
+LOGSTDBY: Logical apply engine was running without TRANSACTION_CONSISTENCY set to FULL, 
+and is currently not in a consistent state.  It must be started and cleanly shutdown before resuming use of this standby.

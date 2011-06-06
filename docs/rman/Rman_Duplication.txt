@@ -1,0 +1,13 @@
+1. Copy all rman backup to same location on remote server
+2. edit new init.ora file and create spfile ,make sure using:
+     make sure db_file_name_convert = ('target1','aux1','target2','aux2');
+3. startup nomount 
+4. edit lister.ora on aux and tnsname.ora to source
+5. rman target / auxiliary system/*@auxi_server
+   {
+     duplicate target databases to aux1
+     logfile '/loca1' size 100m, '/loca2' size 100m;
+   }  
+
+
+

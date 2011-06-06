@@ -1,0 +1,60 @@
+ Oracle Password Repository
+I checked this tool today :
+http://sourceforge.net/projects/opr
+
+This tool provide a simple way of not hardcoding passwords in shell scripts. Hardcoding passwords in shell scripts is a bad practice. 
+The source code may be shared by many developers, may resides on unsecure servers (CVS), may be printed, etc... The passwords may change often too.
+
+This tool uses a simple file to stores the passwords encrypted. Well, I urge you to secure this file to make it non-accessible for others.
+
+I am not going to decode nor rate the encryption algorythm, the fact is, you do not have clear text passwords. It could be also possible to 
+have clear text password in a separate text file, which would not be that less secure, but it is ugly.
+
+To make it clear (I hope), it is a 2-ways encryption, so if you have access to the file and the source code of the algorythm, you can crack 
+the password. Sounds weak? Well, Oracle Proxy Users with Internet Directory, Application Server, Portal and all those products are not much different. 
+The only 100% passwordless solution I am aware of is the external OS identification.
+
+Well, that said, let's look how it works.
+
+
+# ./configure
+# make
+# make install
+
+
+
+let's create the repository
+
+ 
+$ export OPRREPOS=$ORACLE_HOME/dbs/oprrepos
+$ opr -c
+
+
+
+store the password for scott on LSC01
+
+
+$ opr -a LSC01 SCOTT lsc
+please enter the password :
+please re-enter the password :
+entry (LSC01, scott, lsc) added.
+
+
+
+let's test
+
+$ sqlplus scott/$(opr -r LSC01 SCOTT)@LSC01
+
+SQL*Plus: Release 10.2.0.2.0 - Production on Tue Jul 25 13:51:48 2006
+
+Copyright (c) 1982, 2005, Oracle.  All Rights Reserved.
+
+
+Connected to:
+Oracle Database 10g Enterprise Edition Release 10.2.0.2.0 - Production
+With the Partitioning, OLAP and Data Mining options
+
+
+
+
+This is quite convenient. I will use this to store the RMAN password to connect to the RMAN repository in my backup scripts

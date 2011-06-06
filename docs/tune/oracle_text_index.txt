@@ -1,0 +1,62 @@
+ Hypercharge complex Oracle LIKE searches with text indexes
+
+Don Burleson
+ 
+One serious SQL performance problem occurs when you use the SQL LIKE operator to find a string within a large Oracle table column (e.g. VARCHAR(2000), CLOB, BLOB):
+ 
+Select stuff from bigtab where text_column like '%ipod%';
+
+Because standard Oracle cannot index into a large column, there likequeries cause full-table scams, and Oracle must examine every row in the table, 
+even when the result set is very small. These unnecessary full-table scans are a problem:
+ 
+ 1. Large-table full-table scans increase the load on the disk I/O sub-system
+ 2. Small table full table scans (in the data buffer) cause high consistent gets and drive-up CPU consumption 
+
+ The Oracle*Text utility (formally called Oracle ConText and Oracle Intermedia) allows us to parse through a large text column and index on the words within the column. 
+
+Unlike ordinary b-tree or bitmap indexes, Oracle context, ctxcat and ctxrule indexes are NOT updated as content is changed.  
+Since most standard Oracle databases will use the ctxcat index with standard relational tables, you must decide on a refresh interval.
+
+Hence, Oracle Text indexes are only useful for removing full-table scans when the tables are largely read-only and/or the end-users don't mind not having 100% search recall:
+
+    * The target table is relatively static (e.g. nightly batch updates)
+    * Your end-users would not mind 'missing' the latest row data 
+
+
+Oracle Text works with traditional data columns and also with MS-Word docs and Adobe PDF files that are stored within Oracle.  Oracle Text has several index types:
+
+    * CTXCAT Indexes - A CTXCAT index is best for smaller text fragments that must be indexed along with other standard relational data (VARCHAR2). 
+    * CONTEXT Indexes - The CONTEXT index type is used to index large amounts of text such as Word, PDF, XML, HTML or plain text documents. 
+    * CTXRULE Indexes - A CTXRULE index can be used to build document classification applications. 
+
+These types of indexes allow you to replace the old-fashioned SQL 'LIKE' syntax with 'CONTAINS' or 'CATSEARCH' SQL syntax:
+When we execute the query with the new index we see that the full-table scan is replaced with a index scan, greatly reducing execution speed and improving hardware stress:
+
+Execution Plan
+----------------------------------------------------------
+
+   0      SELECT STATEMENT Optimizer=FIRST_ROWS
+
+   1    0   SORT (ORDER BY) 
+
+   2    1     TABLE ACCESS (BY INDEX ROWID) OF 'BIGTAB' 
+
+   3    2       DOMAIN INDEX OF 'TEXT-COLUMN_IDX' 
+
+
+Index re-synchronization
+
+Because rebuilding an Oracle Text index (context, ctxcat, ctxrule) requires a full-table scan and lots of internal parsing, 
+it is not practical to use triggers for instantaneous index updates. 
+
+Updating Oracle Text indexes is easy and they can be schedules using dbms_job or the Oracle 10g dbms_scheduler utility package:  
+Oracle text provides a CTX_DDL package with the sync_index and optimize_index procedures:
+
+SQL> EXEC CTX_DDL.SYNC_INDEX('text_column_idx');
+SQL> EXEC CTX_DDL.OPTIMIZE_INDEX('text_column_idx','FULL');
+
+For example, if you create a nightly dbms_scheduler job to call sync_index, your index will be refreshed, but the structure will become sub-optimal over time.  
+Oracle recommends that you periodically use the optimize_index package to periodically re-build the whole index from scratch.  
+Index optimization can be performed in three modes (FAST, FULL or TOKEN).
+In sum, the Oracle Text indexes are great for removing unnecessary full-table scans from static Oracle tables and they can reduce I/O by several orders of magnitude, 
+greatly improving overall SQL performance.

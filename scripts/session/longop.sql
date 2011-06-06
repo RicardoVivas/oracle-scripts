@@ -1,0 +1,1 @@
+select * from V$SESSION_LONGOPS where last_update_time > sysdate - 1/24 order by last_update_time desc

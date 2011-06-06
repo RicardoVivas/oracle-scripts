@@ -1,0 +1,29 @@
+
+Assume you have the following script called mytest stored in the RMAN catalog:
+
+{
+allocate channel c1 type disk;
+  copy datafile 'e:\ora816\oradata\V816\users01.dbf' to 'c:\data\junk\users01a.dbf';
+}
+
+To execute this script, you enter the following:
+
+RMAN> run {execute script mytest;}
+
+
+
+However, if you want to store the script in an OS file, you need to place the run command in front of the script:
+
+run {allocate channel c1 type disk;
+  copy datafile 'e:\ora816\oradata\V816\users01.dbf' to 'c:\data\junk\users01a.dbf';
+}
+
+To execute the script from the file you either:
+Execute it from within RMAN:
+RMAN> @c:\file\path\mytest.rman
+
+--OR--
+
+Execute it from the OS command line:
+C:\>rman target username/password catalog rman/rman@R816 @c:\data\junk\mytest.rman
+

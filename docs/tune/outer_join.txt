@@ -1,0 +1,21 @@
+Outer Joins
+
+An outer join extends the result of a simple join. An outer join returns all rows that satisfy the join condition
+ and also returns some or all of those rows from one table for which no rows from the other 
+ satisfy the join condition.
+
+   * To write a query that performs an outer join of tables A and B and returns all rows from A 
+     (a left outer join), use the LEFT [OUTER] JOIN syntax in the FROM clause, 
+     or apply the outer join operator (+) to all columns of B in the join condition in the WHERE clause. 
+     For all rows in A that have no matching rows in B, Oracle Database returns null for any select 
+     list expressions containing columns of B.
+     
+   * To write a query that performs an outer join of tables A and B and returns all rows from B (a right outer join), 
+      use the RIGHT [OUTER] JOIN syntax in the FROM clause, or apply the outer join operator (+) to all columns of A
+       in the join condition in the WHERE clause. 
+       For all rows in B that have no matching rows in A, Oracle returns null for any select list expressions 
+       containing columns of A.
+       
+   * To write a query that performs an outer join and returns all rows from A and B,
+       extended with nulls if they do not satisfy the join condition (a full outer join), 
+       use the FULL [OUTER] JOIN syntax in the FROM clause.

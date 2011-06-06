@@ -1,0 +1,33 @@
+1. System TableSpace:
+
+startup force mount;
+restore tablespace system;
+recover tablespace system;
+alter database open;
+
+
+//this only apply to the db open status.
+2. Normal Tablespace or data file   P461
+For tablespace:
+sql 'alter tablespace users offline';
+restore  tablespace users ;
+recover  tablespace users;
+sql 'alter tablespace users online';
+
+For datafile:
+sql 'alter datafile 11 offline'; or in sql*plus: alter database datafile 'full_path_name' offline;
+restore  datafile   11;
+recover  datafile   11;
+sql 'alter datafile 11  online';
+
+
+3  Loss of unarchived online log
+startup mont;
+list backup of archivelog from time='sysdate -7';
+restore database until sequence=4 thread=1 force; <note the word force to ensureall datafiles are restored keywork P464)
+recover database until sequence=4 thread=1;
+shutdown immediate;
+manually copy control file and old archivelogs belonging to the old instance to do a backup before open db resetlogs.
+
+
+

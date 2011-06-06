@@ -1,0 +1,1 @@
+select substr(target_type,1,20) type, substr(policy_name,1,20) poli_name, substr(target_name,1,20) tar_name,  substr(message,1,100) short_msg, collection_timestamp from sysman.mgmt$policy_violation_current order by target_type, policy_name,  target_name 

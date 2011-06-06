@@ -1,0 +1,45 @@
+First need to set the client_id. You can set it via a logon trigger.
+
+
+CREATE OR REPLACE TRIGGER LOGON_TRIGGER
+AFTER LOGON ON DATABASE
+DECLARE
+v_user_identifier varchar2(64);
+BEGIN
+SELECT SYS_CONTEXT('USERENV', 'OS_USER')   
+       ||':'||
+       SYS_CONTEXT('USERENV', 'IP_ADDRESS')
+  INTO v_user_identifier
+  FROM dual;
+DBMS_SESSION.SET_IDENTIFIER(v_user_identifier);
+END;
+/
+
+
+
+SYS@perseus SQL>execute dbms_monitor.client_id_trace_enable('cuscab:137.205.194.128',TRUE,FALSE);
+PL/SQL procedure successfully completed.
+
+SYS@perseus SQL>execute dbms_monitor.client_id_trace_disable('cuscab:137.205.194.128');
+PL/SQL procedure successfully completed.
+
+
+trcsess output=blogiot_5_10000.trc clientid='cuscab:137.205.194.128' *.trc
+tkprof blogheap_5_10000.trc  blogheap_5_10000.txt
+ 
+
+
+
+
+-- background ------ 
+ 
+http://www.oracle.com/technology/oramag/oracle/04-sep/o54talking.html
+
+
+SQL> EXEC DBMS_MONITOR.session_trace_enable(session_id=>1234, serial_num=>1234);
+SQL> EXEC DBMS_MONITOR.session_trace_enable(session_id =>1234, serial_num=>1234, waits=>TRUE, binds=>FALSE);
+SQL> EXEC DBMS_MONITOR.session_trace_disable(session_id=>1234, serial_num=>1234);
+
+SQL> EXEC DBMS_MONITOR.serv_mod_act_trace_enable(service_name=>'db10g', module_name=>'test_api', action_name=>'running');
+SQL> EXEC DBMS_MONITOR.serv_mod_act_trace_enable(service_name=>'db10g', module_name=>'test_api', action_name=>'running',  waits=>TRUE, binds=>FALSE);
+SQL> EXEC DBMS_MONITOR.serv_mod_act_trace_disable(service_name=>'db10g', module_name=>'test_api', action_name=>'running');

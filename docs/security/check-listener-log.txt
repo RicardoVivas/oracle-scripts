@@ -1,0 +1,180 @@
+create directory listener_log_dir as '/usr/orahome/network/log';
+
+--Next, create the external table on the log file. Note the contents of the log file carefully; 
+--it generally contains six pieces of information separated by the "*" character. 
+--These pieces will become columns of the external table.
+
+create table listener_log
+(
+   log_date      date,
+   connect_data  varchar2(300), 
+   protocol_data varchar2(300),
+   command       varchar2(15),
+   service_name  varchar2(15),
+   return_code   number(10)
+)
+organization external (
+   type oracle_loader
+   default directory LISTENER_LOG_DIR
+   access parameters
+   (
+      records delimited by newline
+      nobadfile 
+      nologfile
+      nodiscardfile
+      fields terminated by "*" lrtrim
+      missing field values are null
+      (
+          log_date char(30) date_format 
+          date mask "DD-MON-YYYY HH24:MI:SS",
+          connect_data,
+          protocol_data,
+          command,
+          service_name,
+          return_code
+      )
+   )
+   location ('listener.log')
+)
+reject limit unlimited
+/
+
+--After the table is created, you can select from it to confirm the definition is correct.
+--The lines are fairly descriptive but embedded commands such as (COMMAND=stop) can make it difficult to decipher. 
+-- In that case, write another function to extract the values from the strings:
+
+create or replace function extract_value
+(
+    p_in varchar2,
+    p_param in varchar2
+)
+return varchar2
+as
+    l_begin     number(3);
+    l_end       number(3);
+    l_val       varchar2(2000);
+begin
+    l_begin := instr (upper(p_in), '('||p_param||'=');
+    l_begin := instr (upper(p_in), '=', l_begin);
+    l_end := instr (upper(p_in), ')', l_begin);
+    l_val := substr (p_in, l_begin+1, l_end - l_begin - 1);
+    return l_val;
+end;
+
+--The monitoring becomes extremely easy then. 
+--All you have to do to uncover failed login attempts is issue
+
+col l_user format a10with the embedde
+col service format a20
+col logdate format a20
+col host format a10
+col RC format a5
+select to_char(log_date,'mm/dd/yy hh24:mi:ss') logdate,
+       extract_value (connect_data,'HOST')    host,
+       extract_value (connect_data,'USER')    l_user,
+       extract_value (connect_data,'SERVICE') service,
+       action                                 RC
+from listener_log
+where extract_value (connect_data, 'COMMAND') in
+(
+        'password',
+        'rawmode',
+        'displaymode',
+        'trc_file',
+        'trc_directory',
+        'trc_level',
+        'log_file',
+        'log_directory',
+        'log_status',
+        'current_listener',
+        'inbound_connect_timeout',
+        'startup_waittime',
+        'save_config_on_stop',
+        'start',
+        'stop',
+        'status',
+        'services',
+        'version',
+        'reload',
+        'save_config',
+        'trace',
+        'spawn',
+        'change_password',
+        'quit',
+        'exit'
+)
+
+This returns output similar to
+
+LOGDATE              COMMAND         HOST       L_USER     SERVICE              RC
+-------------------- --------------- ---------- ---------- -------------------- -----
+10/02/05 02:57:36    stop            prlddb01   oraprld    LISTENER_PRLDDB01    0
+10/02/05 04:47:03    stop            prlddb01   oraprld    listener_prlddb01    0
+10/03/05 15:14:53    stop            prlddb01   oraprld    LISTENER_PRLDDB01    0
+11/18/05 23:48:26    reload          prlddb01   oraprld    LISTENER_PRLDDB01    0
+
+-- As you can see, the output shows the date and time of the command along with the return codes. 
+--You can also modify the query to show only those values where the return code is not 0. 
+--You can also add a predicate to show records after a certain date only, so that the attempts for 
+--only today are shown. If you run this script every day, you can see the attempts of that day only.
+
+--The above shows data for invalid passwords only. For the admin-restricted listeners, the error string shows 
+--only three fields and thus the columns of the table LISTENER_LOG have different meanings: 
+--The second column shows the command issued by the user and the third column shows the return code.
+
+select 
+	log_date,
+	connect_data 	       command,
+	protocol_data	       return_code
+from listener_log
+where connect_data in
+(
+        'password',
+        'rawmode',
+        'displaymode',
+        'trc_file',
+        'trc_directory',
+        'trc_level',
+        'log_file',
+        'log_directory',
+        'log_status',
+        'current_listener',
+        'inbound_connect_timeout',
+        'startup_waittime',
+        'save_config_on_stop',
+        'start',
+        'stop',
+        'status',
+        'services',
+        'version',
+        'reload',
+        'save_config',
+        'trace',
+        'spawn',
+        'change_password',
+        'quit',
+        'exit'
+)
+/
+
+This returns:
+
+LOG_DATE  COMMAND              RETURN_CODE
+--------- -------------------- ---------------
+06-NOV-05 change_password      0
+06-NOV-05 save_config          0
+06-NOV-05 log_file             0
+06-NOV-05 trc_level            12508
+06-NOV-05 save_config_on_stop  12508
+06-NOV-05 log_directory        12508
+06-NOV-05 log_directory        12508
+06-NOV-05 stop                 1169
+06-NOV-05 stop                 1169
+06-NOV-05 services             1169
+06-NOV-05 status               1169
+06-NOV-05 reload               1169
+06-NOV-05 status               1169
+06-NOV-05 stop                 1169
+06-NOV-05 status               1169
+06-NOV-05 stop                 1169
+

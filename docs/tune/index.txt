@@ -1,0 +1,30 @@
+b-tree indexes maybe used if any combinations of the leading columns of the index are used in the SQL statment.
+See "introduction to Oracle9i SQL" P436
+
+
+
+select * from v$object_usage; (it only display index of current user)
+alter index INDX_HITLOG_DATE  monitoring usage
+alter index INDX_HITLOG_suburl  nomonitoring usage
+
+
+select 'alter index ' || index_name ||  ' monitoring usage;' from user_indexes order by 1;
+select 'alter index ' || index_name ||  ' nomonitoring usage;' from user_indexes order by 1;
+
+
+alter index <name> rebuild compress
+ 
+When you use LIKE to search an indexed column for a pattern, Oracle can use the index to improve the statement's
+ performance if the leading character in the pattern is not "%" or "_". In this case, 
+ Oracle can scan the index by this leading character. 
+ If the first character in the pattern is "%" or "_", then the index cannot improve the query's performance 
+ because Oracle cannot scan the index.
+ 
+ 
+Like Conditions:
+ % matches any string of any length (including length 0)
+ _ matches any single character.
+ 
+ 
+ index:
+ 

@@ -1,0 +1,3 @@
+The workaround is to turn off Listener direct handoff by adding parameter
+DIRECT_HANDOFF_TTC_<LISTENER-NAME>=OFF  to the LISTENER.ORA, then restart
+the Listener

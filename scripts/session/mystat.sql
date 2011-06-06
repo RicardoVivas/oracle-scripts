@@ -1,0 +1,1 @@
+select a.sid, a.value, b.name from v$mystat a, v$statname b where a.STATISTIC# = b.STATISTIC# and a.value > 0 order by a.value;

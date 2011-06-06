@@ -1,0 +1,1 @@
+select b.sid, b.serial#, b.username, b.program from v$process a, v$session b where a.addr = b.paddr and a.spid=&os_processs_id

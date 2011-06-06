@@ -1,0 +1,55 @@
+Loss of control files does not means incomplete recovery.
+
+If all the online log files are intact, use the following command to re-create the control file
+SQL> ALTER DATABASE BACKUP CONTROLFILE TO TRACE NORESETLOGS;
+
+Or
+Recover using a backup control file.
+If you are unable to create a control file using the previous procedure, 
+then you can use a backup control file, perform complete recovery, and open the database with the 
+RESETLOGS option
+
+It seems better to use the first one. Since do not need open resetlogs
+
+The following is a copy of generated trace file.
+
+######################################################################################################
+
+STARTUP NOMOUNT
+CREATE CONTROLFILE REUSE DATABASE "JUNO" NORESETLOGS  ARCHIVELOG
+    MAXLOGFILES 5     MAXLOGMEMBERS 3     MAXDATAFILES 100    MAXINSTANCES 1    MAXLOGHISTORY 292
+LOGFILE
+  GROUP 1 '/www/oracle/oradata/juno/redo01.log'  SIZE 100M,
+  GROUP 2 '/www/oracle/oradata/juno/redo02.log'  SIZE 100M,
+  GROUP 3 '/www/oracle/oradata/juno/redo03.log'  SIZE 100M
+-- STANDBY LOGFILE
+DATAFILE
+  '/www/oracle/oradata/juno/system01.dbf',
+  '/www/oracle/oradata/juno/undotbs01.dbf',
+  '/www/oracle/oradata/juno/users01.dbf',
+  '/www/oracle/oradata/juno/logsumindx01.dbf'
+CHARACTER SET WE8ISO8859P1;
+
+-- Configure RMAN configuration record 1
+VARIABLE RECNO NUMBER;
+EXECUTE :RECNO := SYS.DBMS_BACKUP_RESTORE.SETCONFIG('CONTROLFILE AUTOBACKUP','ON');
+-- Configure RMAN configuration record 2
+VARIABLE RECNO NUMBER;
+EXECUTE :RECNO := SYS.DBMS_BACKUP_RESTORE.SETCONFIG('CONTROLFILE AUTOBACKUP FORMAT FOR DEVICE TYPE','DISK TO ''/usr/orabackup/rman/tin-cf_%F''');
+-- Commands to re-create incarnation table
+-- Below log names MUST be changed to existing filenames on disk. 
+-- Any one log file from each branch can be used to re-create incarnation records.
+-- ALTER DATABASE REGISTER LOGFILE '/www/oracle/oradata/juno/archive/1_1_504365836.dbf';
+-- ALTER DATABASE REGISTER LOGFILE '/www/oracle/oradata/juno/archive/1_1_602096499.dbf';
+-- ALTER DATABASE REGISTER LOGFILE '/www/oracle/oradata/juno/archive/1_1_617386587.dbf';
+
+-- Recovery is required if any of the datafiles are restored backups, or if the last shutdown was not normal or immediate.
+RECOVER DATABASE
+-- All logs need archiving and a log switch is needed.
+ALTER SYSTEM ARCHIVE LOG ALL;
+-- Database can now be opened normally.
+ALTER DATABASE OPEN;
+-- Commands to add tempfiles to temporary tablespaces. Online tempfiles have complete space information.Other tempfiles may require adjustment.
+ALTER TABLESPACE TEMP ADD TEMPFILE '/www/oracle/oradata/juno/temp01.dbf' SIZE 838860800  REUSE AUTOEXTEND ON NEXT 655360  MAXSIZE 32767M;
+
+######################################################################################################
