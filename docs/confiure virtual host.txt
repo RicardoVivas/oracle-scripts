@@ -1,0 +1,16 @@
+1. set the hostname in the dns file
+2. create /usr/local/apache/conf/vhost/quizbuilder-test.warwick.ac.uk
+    <VirtualHost  137.205.192.78>
+       ServerName quizbuilder-test.warwick.ac.uk
+       DocumentRoot /usr/local/apache/htdocs
+       CustomLog logs/quiz-access.log combined
+       ErrorLog logs/quiz-error.log
+       RewriteEngine on
+       RewriteLog logs/quiz-rewrite.log
+       RewriteLogLevel 0
+       RewriteRule (.*) http://localhost:8080$1 [P]
+    </VirtualHost>
+    
+3. edit  /usr/local/apache/conf/httpd.conf and add one line:
+     include conf/vhosts/quizbuilder-test.warwick.ac.uk
+4. start apache:  sudo /usr/local/apache/bin/apachectl start

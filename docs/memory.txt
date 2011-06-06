@@ -1,0 +1,5 @@
+alter system flush shared_pool
+alter system flush buffer_cache
+
+select o.OBJECT_TYPE, o.OBJECT_NAME,  b.status, count(b.objd) from v$bh b, dba_objects o where b.objd = o.data_object_id group by o.object_type,  o.object_name,b.objd, b.status ;
+select o.OBJECT_TYPE, o.OBJECT_NAME, o.owner,  b.status, from v$bh b, dba_objects o where b.objd = o.data_object_id 

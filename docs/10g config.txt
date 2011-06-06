@@ -1,0 +1,462 @@
+see: http://oracletech.com.au/?p=42
+
+Configure Kernel Parameters and Resource Controls
+
+ 
+
+From the Oracle installation guide it is not clear which kernel parameters are supposed to use the new Solaris 10 resource control facility, and those which are to use the the /etc/system file.
+
+ 
+
+The following table is ripped from the 10.2 installation guide and as it says in the doco, the kernel parameter and shell limit values shown in the following section are recommended values only.
+
+ 
+
+For production database systems, Oracle recommends that you tune these values to optimize the performance of the system. Refer to your operating system documentation for more information about tuning kernel parameters blah blah blah.
+
+ 
+
+The table contains the four resource controls that replace the old entries in the /etc/system file for a specific kernel parameter. Note that the /etc/system file is still used for the parameters listed with an ‘NA’ in the Resource Control Column.
+
+ 
+
+Kernel Parameter
+	
+
+Resource Control
+	
+
+Recommended Value
+
+shmsys:shminfo_shmmax
+	
+
+project.max-shm-memory
+	
+
+4294967295
+
+shmsys:shminfo_shmmni
+	
+
+project.max-shm-ids
+	
+
+100
+
+semsys:seminfo_semmsl
+	
+
+project.max-sem-nsems
+	
+
+256
+
+semsys:seminfo_semmni
+	
+
+project.max-sem-ids
+	
+
+100
+
+noexec_user_stack
+	
+
+NA
+	
+
+1
+
+semsys:seminfo_semmns
+	
+
+NA
+	
+
+1024
+
+semsys:seminfo_semvmx
+	
+
+NA
+	
+
+32767
+
+shmsys:shminfo_shmmin
+	
+
+NA
+	
+
+1
+
+shmsys:shminfo_shmseg
+	
+
+NA
+	
+
+10
+
+ 
+
+ 
+
+I’ll ignore the kernel parameters in /etc/system – that’s documented already. Let’s take a look at the resource control settings instead. Much more interesting.
+
+ 
+
+Before we start setting resource values, we first need to create a project for the Oracle installation:
+
+ 
+
+Create a Project for Oracle
+
+ 
+
+ 
+
+# projadd group.dba
+
+ 
+
+You should now see the project listed by the projects command and in /etc/project
+
+ 
+
+ 
+
+bash-3.00# projects -l group.dba
+
+group.dba
+
+        projid : 100
+
+        comment: ""
+
+        users  : (none)
+
+        groups : (none)
+
+        attribs: 
+
+ 
+
+bash-3.00# cat /etc/project
+
+system:0::::
+
+user.root:1::::
+
+noproject:2::::
+
+default:3::::
+
+group.staff:10::::
+
+group.dba:100::::
+
+ 
+
+Details on the /etc/project file:
+
+man pages section 4: File Formats: project(4)
+
+http://docs.sun.com/app/docs/doc/816-5174/6mbb98ui4?a=view#project-4
+
+ 
+
+ 
+
+Assuming all looks good, then proceeed…
+Configure Project Resource Controls
+
+ 
+
+projmod -sK "project.max-shm-memory=(privileged,2G,deny)" group.dba
+
+projmod -sK "project.max-sem-ids=(privileged,100,deny)" group.dba
+
+projmod -sK "project.max-shm-ids=(privileged,100,deny)" group.dba
+
+projmod -sK "project.max-sem-nsems=(privileged,256,deny)" group.dba
+
+ 
+
+ 
+
+Just to check (for fun):
+
+bash-3.00# projects -l group.dba
+
+group.dba
+
+        projid : 100
+
+        comment: ""
+
+        users  : (none)
+
+        groups : (none)
+
+        attribs: project.max-sem-ids=(privileged,100,deny)
+
+                 project.max-sem-nsems=(privileged,256,deny)
+
+                 project.max-shm-ids=(privileged,100,deny)
+
+                 project.max-shm-memory=(privileged,2147483648,deny)
+
+ 
+
+Hurrah!
+
+ 
+
+ 
+
+For other values that can be assigned to a project, see project(4) and man pages section 5: Standards, Environments, and Macros: resource_controls(5) http://docs.sun.com/app/docs/doc/816-5175/6mbba7f33?a=view
+
+ 
+
+BTW, don’t use the prctl command to change the values (as shown in part of the installation guide) as the changed parameters do not persist after a system restart (as it says later in the installation guide after you have already followed their example and used prctl). Use projmod
+
+ 
+
+For further details see Solaris 10 Reference Manual Collection, man pages section 5: Standards, Environments, and Macros, resource_controls(5)
+
+http://docs.sun.com/app/docs/doc/816-5175/6mbba7f33?a=view
+
+ 
+
+System Administration Guide: Solaris Containers-Resource Management and Solaris Zones
+
+"Setting Resource Controls"
+
+http://docs.sun.com/app/docs/doc/817-1592/6mhahuoj5?a=view
+
+ 
+
+System Administration Guide: Solaris Containers-Resource Management and Solaris Zones, "Projects and Tasks (Overview)"
+
+http://docs.sun.com/app/docs/doc/817-1592/6mhahuoh9?a=view
+
+ 
+Create the Oracle user account, oracle.
+
+ 
+
+    # useradd -g oinstall -G dba -m -d /export/home0/oracle -s /bin/bash -K project=group.dba oracle
+
+ 
+
+·  Set the password of the oracle user:
+
+# passwd -r files oracle
+
+ 
+
+ 
+
+ 
+
+What’s with this –K value? From the sun man page doco:
+
+-K key=value
+
+Replace existing or add to a user’s key=value pair attributes. Multiple -K options can be used to replace or add multiple key=value pairs. The generic -K option with the appropriate key can be used instead of the specific implied key options (-A, -P, -R, -p). See user_attr(4) for a list of valid key=value pairs. Values for these keys are usually found in man pages or other sources related to those keys. For example, see project(4) for guidance on values for the project key. Use the command ppriv(1) with the -v and -l options for a list of values for the keys defaultpriv and limitpriv.
+
+Keys must not be repeated. Specifying a key= without a value removes an existing key=value pair.
+
+The type key must be specified only without a value or with the role value. Specifying the type key without a value leaves the account as a normal user, with the role value changing from a normal user to a role user. As a role account, no roles (-R or roles=value) can be present.
+
+Address : http://docs.sun.com/app/docs/doc/816-5166/6mbb1kqjj?a=view
+
+ 
+
+See user_attr(4) for a list of valid key=value pairs
+
+ 
+
+The Oracle user’s default project
+
+ 
+
+ 
+
+Assuming all is OK, we should now see in the /etc/user_attr file an entry for Oracle.
+
+ 
+
+bash-3.00# cat /etc/user_attr
+
+#
+
+# Copyright 2007 Sun Microsystems, Inc.  All rights reserved.
+
+# Use is subject to license terms.
+
+#
+
+# /etc/user_attr
+
+#
+
+# execution attributes for profiles. see user_attr(4)
+
+#
+
+#ident  "@(#)user_attr  1.1     07/01/31 SMI"
+
+#
+
+#
+
+adm::::profiles=Log Management
+
+lp::::profiles=Printer Management
+
+postgres::::type=role;profiles=Postgres Administration,All
+
+root::::auths=solaris.*,solaris.grant;profiles=Web Console Management,All;lock_after_retries=no
+
+oracle::::type=normal;project=group.dba
+
+ 
+
+ 
+
+ 
+
+Oracle’s default project should now be group.dba
+
+ 
+
+Check:
+
+ 
+
+bash-3.00# su - oracle
+
+Sun Microsystems Inc.   SunOS 5.10      Generic January 2005
+
+-bash-3.00$ id -p
+
+uid=101(oracle) gid=102(oinstall) projid=100(group.dba)
+
+-bash-3.00$
+
+ 
+
+Most satisfactory.
+
+ 
+
+ 
+
+If you have already created the Oracle user – perhaps you are trouble shooting and have just found this great posting by me – 
+
+you can use the usermod command to assign Oracle to the project.
+
+ 
+
+# usermod -K project=group.dba oracle
+
+ 
+
+ 
+
+You may find that while oracle is a member of the project, it’s default project is not group.dba. If this is the case, peruse the 
+
+following, as there is an algorithm Solaris uses to determine the default project:
+
+ 
+
+Determining a User’s Default Project
+
+To log in to the system, a user must be assigned a default project. A user is automatically a member of that default project, even if the user is not in the user or group list specified in that project.
+
+Because each process on the system possesses project membership, an algorithm to assign a default project to the login or other initial process is necessary. The algorithm is documented in the man page getprojent(3C). The system follows ordered steps to determine the default project. If no default project is found, the user’s login, or request to start a process, is denied.
+
+The system sequentially follows these steps to determine a user’s default project:
+
+1.       If the user has an entry with a project attribute defined in the /etc/user_attr extended user attributes database, then the value of the project attribute is the default project. See the user_attr(4) man page.
+
+2.       If a project with the name user.user-id is present in the project database, then that project is the default project. See the project(4) man page for more information.
+
+3.       If a project with the name group.group-name is present in the project database, where group-name is the name of the default group for the user, as specified in the passwd file, then that project is the default project. For information on the passwd file, see the passwd(4) man page.
+
+4.       If the special project default is present in the project database, then that project is the default project.
+
+
+
+ 
+In Confusion Conclusion
+
+ 
+
+That should be enough to get you going – you can continue on with the Oracle installation guide 2.7 Identifying Required Software Directories
+
+ 
+
+Final Note / Appendix  (can you have an appendix in a blog post?)
+
+Commands Used With Projects and Tasks
+
+The commands that are shown in the following table provide the primary administrative interface to the project and task facilities.
+
+Man Page Reference
+	
+
+Description
+
+projects(1)
+	
+
+Displays project memberships for users. Lists projects from project database. Prints information on given projects. If no project names are supplied, information is displayed for all projects. Use the projects command with the -l option to print verbose output.
+
+newtask(1)
+	
+
+Executes the user’s default shell or specified command, placing the execution command in a new task that is owned by the specified project. newtask can also be used to change the task and the project binding for a running process. Use with the -F option to create a finalized task.
+
+passmgmt(1M)
+	
+
+Updates information in the password files. Use with the -K key=value option to add to user attributes or replace user attributes in local files.
+
+projadd(1M)
+	
+
+Adds a new project entry to the /etc/project file. The projadd command creates a project entry only on the local system. projadd cannot change information that is supplied by the network naming service.
+
+Can be used to edit project files other than the default file, /etc/project. Provides syntax checking for project file. Validates and edits project attributes. Supports scaled values.
+
+projmod(1M)
+	
+
+Modifies information for a project on the local system. projmod cannot change information that is supplied by the network naming service. However, the command does verify the uniqueness of the project name and project ID against the external naming service.
+
+Can be used to edit project files other than the default file, /etc/project. Provides syntax checking for project file. Validates and edits project attributes. Can be used to add a new attribute, add values to an attribute, or remove an attribute. Supports scaled values.
+
+projdel(1M)
+	
+
+Deletes a project from the local system. projdel cannot change information that is supplied by the network naming service.
+
+useradd(1M)
+	
+
+Adds default project definitions to the local files. Use with the -K key=value option to add or replace user attributes.
+
+userdel(1M)
+	
+
+Deletes a user’s account from the local file.
+
+usermod(1M)
+	
+
+Modifies a user’s login information on the system. Use with the -K key=value option to add or replace user attributes.
