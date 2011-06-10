@@ -1,0 +1,5 @@
+  $files_vhost="files"
+   include files-app
+   
+   files-app modules init.pp contains $extlookup_source="${files_vhost}",
+   $extlookup_source used in jboss.pp by extlookup function
