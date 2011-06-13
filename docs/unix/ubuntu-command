@@ -1,0 +1,7 @@
+//give us a list of all the currently installed packages.
+dpkg --get-selections 
+
+
+
+ctrl-o and crl-i to go back and forward
+ 
