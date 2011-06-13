@@ -1,0 +1,52 @@
+
+<a href="#" id="a" >click fa</a><br/>
+<a href="#" id="b" >click fb</a><br/>
+<a href="#" id="c" >click fc</a><br/>
+<a href="#" id="d" >click fd</a><br/>
+<a href="#" id="e" >click fe</a><br/>
+<a href="#" id="f" >click ff</a><br/>
+
+
+<script type="text/javascript">
+
+var fz = function() {
+
+function fa (){  alert("hi a");}
+
+function fb (){
+  return function() {  alert("hi b");   };
+}
+
+return {
+ fai:fa,
+ fbi:fb
+};
+
+};
+
+var fc = function (){  alert("hi variable");}
+
+
+
+var linkb = document.getElementById('b');
+linkb.onclick = fz.fb;
+
+var linka = document.getElementById('a');
+linka.onclick = fz.fa;
+ 
+var linke = document.getElementById('e');
+linke.onclick = fc;
+
+var linkf = document.getElementById('f');
+linkf.onclick = fz.fb;
+
+ 
+var mm = fz();
+var linkc = document.getElementById('c');
+linkc.onclick = mm.fbi();
+
+var linkd = document.getElementById('d');
+linkd.onclick = mm.fai();
+
+
+</script>
