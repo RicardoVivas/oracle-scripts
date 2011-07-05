@@ -1,0 +1,5 @@
+Vagrant::Config.run do |config|
+  config.vm.box = "sxp-201011"
+  config.vm.box_url = "http://s3.lds.li/vagrant/sxp-201011.box"
+  config.vm.system = :solaris
+end

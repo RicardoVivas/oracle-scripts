@@ -1,0 +1,25 @@
+http://redstack.wordpress.com/2010/12/14/increasing-swap-size-on-solaris-using-zfs/
+
+bash-3.00# swap -l
+swapfile             dev  swaplo blocks   free
+/dev/zvol/dsk/rpool/swap 256,1      16 4194288 4194288
+Then you will need to unmount it:
+
+bash-3.00# swap -d /dev/zvol/dsk/rpool/swap
+
+You should validate it is unmounted:
+
+bash-3.00# swap -l
+No swap devices configured
+Then you can resize the ZFS volume (just give it the pool name and the volume name):
+
+bash-3.00# zfs set volsize=16G rpool/swap
+And then add it back into your swap space:
+
+bash-3.00# swap -a /dev/zvol/dsk/rpool/swap
+
+And now we see the swap space is back online and larger than before:
+
+bash-3.00# swap -l
+swapfile             dev  swaplo blocks   free
+/dev/zvol/dsk/rpool/swap 256,1      16 33554416 3355441

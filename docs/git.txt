@@ -56,5 +56,8 @@ git co <branch>
 
 git merge new tag
 
+//untrack a file that alrady tracked:
+git rm --cached filename
+
 
 

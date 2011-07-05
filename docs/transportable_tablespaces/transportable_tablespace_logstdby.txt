@@ -1,0 +1,24 @@
+ Importing a Transportable Tablespace to the Primary Database
+
+Perform the following steps to import a tablespace to the primary database.
+
+   1.
+
+      Disable the guard setting so that you can modify the logical standby database:
+
+      SQL> ALTER SESSION DISABLE GUARD;
+
+
+   2.
+
+      Import the tablespace at the logical standby database.
+   3.
+
+      Enable the database guard setting (or disconnect from the session):
+
+      SQL> ALTER SESSION ENABLE GUARD;
+
+
+   4.
+
+      Import the tablespace at the primary database.

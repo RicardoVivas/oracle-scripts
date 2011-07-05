@@ -1,0 +1,16 @@
+//give us a list of all the currently installed packages.
+dpkg --get-selections 
+wajig large: list packages having large size
+
+
+Find package that installed a file
+rpm -qf filename
+dpkg --search filename
+
+ctrl-o and crl-i to go back and forward
+ 
+Check available packages:
+sudo apt-cache dumpavail | grep Package | grep virtualbox
+
+then check is info:
+dpkg --status virtualbox-ose

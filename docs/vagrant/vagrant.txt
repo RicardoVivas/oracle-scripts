@@ -1,0 +1,25 @@
+---- Ubuntu by Vagrant -----
+$ gem install vagrant
+$ vagrant box add base http://files.vagrantup.com/lucid32.box
+$ vagrant init
+$ vagrant up
+
+--  Solaris 10 with puppet by Vagrant -----
+$ gem install vagrant
+$ vagrant box add puppet-solaris-10-64 http://puppetlabs.s3.amazonaws.com/pub/solaris10_64.box
+$ vagrant init puppet-solaris-10-64
+$ vagrant up
+
+
+----- Solaris SXP created by Vagrant -----
+see file Vagrantfile.sxp
+
+
+
+
+
+
+List of boxes : http://www.vagrantbox.es/
+
+
+ 

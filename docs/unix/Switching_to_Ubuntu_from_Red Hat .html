@@ -1,0 +1,332 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8">
+<meta name="robots" content="index,nofollow">
+
+<title>Switching to Ubuntu from Red Hat Enterprise Linux or Fedora - Community Ubuntu Documentation</title>
+<script type="text/javascript" src="/htdocs/common/js/common.js"></script>
+
+<script type="text/javascript">
+<!--
+var search_hint = "Search";
+//-->
+</script>
+
+
+<link rel="stylesheet" type="text/css" charset="utf-8" media="all" href="/htdocs/ubuntunew/css/common.css">
+<link rel="stylesheet" type="text/css" charset="utf-8" media="screen" href="/htdocs/ubuntunew/css/screen.css">
+<link rel="stylesheet" type="text/css" charset="utf-8" media="print" href="/htdocs/ubuntunew/css/print.css">
+<link rel="stylesheet" type="text/css" charset="utf-8" media="projection" href="/htdocs/ubuntunew/css/projection.css">
+
+<!-- css only for MSIE browsers -->
+<!--[if IE]>
+   <link rel="stylesheet" type="text/css" charset="utf-8" media="all" href="/htdocs/ubuntunew/css/msie.css">
+<![endif]-->
+
+
+
+<link rel="Start" href="/community/UserDocumentation">
+<link rel="Alternate" title="Wiki Markup" href="/community/SwitchingToUbuntu/FromLinux/RedHatEnterpriseLinuxAndFedora?action=raw">
+<link rel="Alternate" media="print" title="Print View" href="/community/SwitchingToUbuntu/FromLinux/RedHatEnterpriseLinuxAndFedora?action=print">
+<link rel="Up" href="/community/SwitchingToUbuntu/FromLinux">
+<link rel="Search" href="/community/FindPage">
+<link rel="Index" href="/community/TitleIndex">
+<link rel="Glossary" href="/community/WordIndex">
+<link rel="Help" href="/community/HelpOnFormatting">
+</head>
+
+<body  lang="en" dir="ltr">
+
+<div id="round" class="roundme">
+<img id="topcap" alt="" src="https://help.ubuntu.com/htdocs/ubuntunew/img/cap-top.png">
+<div id="layout" class="container clear-block">
+<div id="header">
+<div id="logo-floater">
+<h1><a href="http://help.ubuntu.com" title="Ubuntu Documentation"><img alt="Ubuntu" id="logo" src="https://help.ubuntu.com/htdocs/ubuntunew/img/logo.png" /></a></h1>
+</div>
+
+<noscript>
+ <form action="http://www.google.com/cse" id="cse-search-box">
+   <div>
+     <input type="hidden" name="cx" value="004599128559784038176:vj_p0xo-nng" />
+     <input type="hidden" name="ie" value="UTF-8" />
+     <input type="text" name="q" size="27" />
+     <input type="submit" name="sa" value="Search" />
+   </div>
+ </form>
+</noscript>
+
+<script>
+ document.write('<form action="https://help.ubuntu.com/search.html" id="cse-search-box">');
+ document.write('  <div>');
+ document.write('    <input type="hidden" name="cof" value="FORID:9" />');
+ document.write('    <input type="hidden" name="cx" value="004599128559784038176:vj_p0xo-nng" />');
+ document.write('    <input type="hidden" name="ie" value="UTF-8" />');
+ document.write('    <input type="text" name="q" size="27" />');
+ document.write('    <input type="submit" name="sa" value="Search" />');
+ document.write('  </div>');
+ document.write('</form>');
+</script>
+
+<div id="sitename"><a href="https://help.ubuntu.com/community"><img src="https://help.ubuntu.com/htdocs/ubuntunew/img/help-faq.png" /><span>Community Documentation</span></a></div>
+</div> <!--header-->
+<ul id="loginbar"><li><a href="/community/SwitchingToUbuntu/FromLinux/RedHatEnterpriseLinuxAndFedora?action=login" id="login" rel="nofollow">Login to Edit</a></li></ul>
+
+
+<!--1-->
+<div id="page" lang="en" dir="ltr">
+
+<!--2-->
+
+<div id="breadcrumbs">
+<a href="https://help.ubuntu.com/">Ubuntu Documentation</a> &gt; <a href="https://help.ubuntu.com/community">Community Documentation</a> &gt; <a href="/community/SwitchingToUbuntu">SwitchingToUbuntu</a><a href="/community/SwitchingToUbuntu/FromLinux">FromLinux</a><a class="backlink" href="/community/SwitchingToUbuntu/FromLinux/RedHatEnterpriseLinuxAndFedora?action=fullsearch&amp;context=180&amp;value=linkto%3A%22SwitchingToUbuntu/FromLinux/RedHatEnterpriseLinuxAndFedora%22" rel="nofollow" title="Click to do a full-text search for this title">RedHatEnterpriseLinuxAndFedora</a>
+</div>
+
+
+<ul id="pagelocation">
+<li><a href="/community/SwitchingToUbuntu">SwitchingToUbuntu</a></li><li><a href="/community/SwitchingToUbuntu/FromLinux">FromLinux</a></li><li><a class="backlink" href="/community/SwitchingToUbuntu/FromLinux/RedHatEnterpriseLinuxAndFedora?action=fullsearch&amp;context=180&amp;value=linkto%3A%22SwitchingToUbuntu/FromLinux/RedHatEnterpriseLinuxAndFedora%22" rel="nofollow" title="Click to do a full-text search for this title">RedHatEnterpriseLinuxAndFedora</a></li>
+</ul>
+
+<!--3--><div dir="ltr" id="content" lang="en"><span class="anchor" id="top"></span>
+<span class="anchor" id="line-2"></span><span class="anchor" id="line-3"></span><div><table style="float:right;  font-size: 0.9em;  width:40%;  background:#F1F1ED;  margin: 0 0 1em 1em;"><tbody><tr>  <td style="padding:0.5em;"><p class="line891"><div class="table-of-contents"><p class="table-of-contents-heading">Contents<ol><li><a href="#Administrative Tasks">Administrative Tasks</a></li><li><a href="#Package Management">Package Management</a><ol><li><a href="#Graphical Tools">Graphical Tools</a></li><li><a href="#Command Line Tools">Command Line Tools</a></li><li><a href="#Table of Equivalent Commands">Table of Equivalent Commands</a></li></ol><li><a href="#Services">Services</a><ol><li><a href="#Graphical Tools">Graphical Tools</a></li><li><a href="#Command Line Tools">Command Line Tools</a></li></ol><li><a href="#Network">Network</a><ol><li><a href="#Graphical Tools">Graphical Tools</a></li><li><a href="#Command Line Tools">Command Line Tools</a></li></ol></li></ol></div></td>
+</tr>
+</tbody></table></div><span class="anchor" id="line-4"></span><span class="anchor" id="line-5"></span><p class="line862">It is easy to apply your existing knowledge of <em>Red Hat Enterprise Linux</em> or <em>Fedora</em> to Ubuntu. The key differences between them are covered in this article. <span class="anchor" id="line-6"></span><span class="anchor" id="line-7"></span><p class="line867">
+<h2 id="Administrative Tasks">Administrative Tasks</h2>
+<span class="anchor" id="line-8"></span><p class="line874">In Red Hat Enterprise Linux and Fedora by default, each administrative user needs to know the root password, in addition to their own password. <span class="anchor" id="line-9"></span><span class="anchor" id="line-10"></span><p class="line862">In Ubuntu, each user only has one password. Users in the <strong>admin</strong> group can run command line and graphical applications with elevated privileges. Graphical admin tools prompt for this password when run, and command line tools can be run with root-privileges using <a href="/community/RootSudo">sudo</a>.  <span class="anchor" id="line-11"></span><span class="anchor" id="line-12"></span><p class="line867">
+<h2 id="Package Management">Package Management</h2>
+<span class="anchor" id="line-13"></span><span class="anchor" id="line-14"></span><p class="line862">Ubuntu has more packages available than Fedora, so you'll have a better chance of finding what you want in the repositories. As with Fedora, graphical applications will put a link into the <strong>Applications</strong> menu.   <span class="anchor" id="line-15"></span><span class="anchor" id="line-16"></span><p class="line867">
+<h3 id="Graphical Tools">Graphical Tools</h3>
+<span class="anchor" id="line-17"></span><p class="line862">The <strong>Synaptic package Manager</strong> is an excellent tool for finding, fetching and installing packages. Press <strong>System -&gt; Administration -&gt; Synaptic Package Manager</strong> to start Synaptic. <span class="anchor" id="line-18"></span><span class="anchor" id="line-19"></span><p class="line867">
+<h3 id="Command Line Tools">Command Line Tools</h3>
+<span class="anchor" id="line-20"></span><p class="line862">Ubuntu uses <em>apt-get</em> instead of <em>yum</em>, <em>up2date</em> and so on to find, download, and install packages and their dependencies. <span class="anchor" id="line-21"></span><span class="anchor" id="line-22"></span><p class="line874">Note that, unlike yum, apt-get is only for packages available in repositories - it cannot handle packages you have already downloaded. The dpkg command is used instead. <span class="anchor" id="line-23"></span><span class="anchor" id="line-24"></span><p class="line867">
+<h3 id="Table of Equivalent Commands">Table of Equivalent Commands</h3>
+<span class="anchor" id="line-25"></span><span class="anchor" id="line-26"></span><p class="line874">Below is a table of equivalent commands for package management on both Ubuntu/Debian and Red Hat/Fedora systems. <span class="anchor" id="line-27"></span><span class="anchor" id="line-28"></span><div><table><tbody><tr style="background: #7D590E;  color: white;  text-align:center">  <td><p class="line862"> <strong>Task</strong> </td>
+  <td><p class="line862"> <strong>Red Hat/Fedora</strong> </td>
+  <td><p class="line862"> <strong>Ubuntu</strong> </td>
+</tr>
+<tr style="background: #D9BB7A">  <td colspan="3" style="text-align: center"><span class="anchor" id="line-29"></span><p class="line891"><strong>Adding, Removing and Upgrading Packages</strong></td>
+</tr>
+<tr>  <td><span class="anchor" id="line-30"></span><p class="line862"> Refresh list of available packages </td>
+  <td><p class="line862"> Yum refreshes each time it's used </td>
+  <td><p class="line862"> apt-get update </td>
+</tr>
+<tr>  <td><span class="anchor" id="line-31"></span><p class="line862"> Install a package from a repository </td>
+  <td><p class="line862"> yum install <em>package_name</em> </td>
+  <td><p class="line862"> apt-get install <em>package_name</em> </td>
+</tr>
+<tr>  <td><span class="anchor" id="line-32"></span><p class="line862"> Install a package file </td>
+  <td><p class="line862"> yum install <em>package.rpm</em> <br />
+ rpm -i <em>package.rpm</em> </td>
+  <td><p class="line862"> dpkg --install <em>package.deb</em> </td>
+</tr>
+<tr>  <td><span class="anchor" id="line-33"></span><p class="line862"> Remove a package </td>
+  <td><p class="line862"> rpm -e <em>package_name</em> </td>
+  <td><p class="line862"> apt-get remove <em>package_name</em> </td>
+</tr>
+<tr>  <td><span class="anchor" id="line-34"></span><p class="line862"> Check for package upgrades </td>
+  <td><p class="line862"> yum check-update </td>
+  <td><p class="line862"> apt-get -s upgrade <br />
+ apt-get -s dist-upgrade </td>
+</tr>
+<tr>  <td><span class="anchor" id="line-35"></span><p class="line862"> Upgrade packages </td>
+  <td><p class="line862"> yum update <br />
+ rpm -Uvh [args] </td>
+  <td><p class="line862"> apt-get dist-upgrade </td>
+</tr>
+<tr>  <td><span class="anchor" id="line-36"></span><p class="line862"> Upgrade the entire system </td>
+  <td><p class="line862"> yum upgrade </td>
+  <td><p class="line862"> apt-get dist-upgrade </td>
+</tr>
+<tr style="background: #D9BB7A">  <td colspan="3" style="text-align: center"><span class="anchor" id="line-37"></span><p class="line891"><strong>Package Information</strong></td>
+</tr>
+<tr>  <td><span class="anchor" id="line-38"></span><p class="line862"> Get information about an available package </td>
+  <td><p class="line862"> yum search <em>package_name</em> </td>
+  <td><p class="line862"> apt-cache search <em>package_name</em> </td>
+</tr>
+<tr>  <td><span class="anchor" id="line-39"></span><p class="line862"> Show available packages </td>
+  <td><p class="line862"> yum list available </td>
+  <td><p class="line862"> apt-cache dumpavail </td>
+</tr>
+<tr>  <td><span class="anchor" id="line-40"></span><p class="line862"> List all installed packages </td>
+  <td><p class="line862"> yum list installed <br />
+ rpm -qa </td>
+  <td><p class="line862"> dpkg --list </td>
+</tr>
+<tr>  <td><span class="anchor" id="line-41"></span><p class="line862"> Get information about a package </td>
+  <td><p class="line862"> yum info <em>package_name</em> </td>
+  <td><p class="line862"> apt-cache show <em>package_name</em> </td>
+</tr>
+<tr>  <td><span class="anchor" id="line-42"></span><p class="line862"> Get information about an installed package </td>
+  <td><p class="line862"> rpm -qi <em>package_name</em> </td>
+  <td><p class="line862"> dpkg --status <em>package_name</em> </td>
+</tr>
+<tr>  <td><span class="anchor" id="line-43"></span><p class="line862"> List files in an installed package </td>
+  <td><p class="line862"> rpm -ql <em>package_name</em> </td>
+  <td><p class="line862"> dpkg --listfiles <em>package_name</em> </td>
+</tr>
+<tr>  <td><span class="anchor" id="line-44"></span><p class="line862"> List documentation files in an installed package </td>
+  <td><p class="line862"> rpm -qd <em>package_name</em> </td>
+  <td><p class="line862"> - </td>
+</tr>
+<tr>  <td><span class="anchor" id="line-45"></span><p class="line862"> List configuration files in an installed package </td>
+  <td><p class="line862"> rpm -qc <em>package_name</em> </td>
+  <td><p class="line862"> - </td>
+</tr>
+<tr>  <td><span class="anchor" id="line-46"></span><p class="line862"> Show the packages a given package depends on </td>
+  <td><p class="line862"> rpm -qR <em>package_name</em> </td>
+  <td><p class="line862"> apt-cache depends </td>
+</tr>
+<tr>  <td><span class="anchor" id="line-47"></span><p class="line862"> Show other packages that depend on a <br />
+ given package (reverse dependency) </td>
+  <td><p class="line862"> rpm -q -whatrequires [args] </td>
+  <td><p class="line862"> apt-cache rdepends </td>
+</tr>
+<tr style="background: #D9BB7A">  <td colspan="3" style="text-align: center"><span class="anchor" id="line-48"></span><p class="line891"><strong>Package File Information</strong></td>
+</tr>
+<tr>  <td><span class="anchor" id="line-49"></span><p class="line862"> Get information about a package file </td>
+  <td><p class="line862"> rpm -qpi <em>package.rpm</em> </td>
+  <td><p class="line862"> dpkg --info <em>package.deb</em> </td>
+</tr>
+<tr>  <td><span class="anchor" id="line-50"></span><p class="line862"> List files in a package file </td>
+  <td><p class="line862"> rpm -qpl <em>package.rpm</em> </td>
+  <td><p class="line862"> dpkg --contents <em>package.deb</em> </td>
+</tr>
+<tr>  <td><span class="anchor" id="line-51"></span><p class="line862"> List documentation files in a package file </td>
+  <td><p class="line862"> rpm -qpd <em>package.rpm</em> </td>
+  <td><p class="line862"> - </td>
+</tr>
+<tr>  <td><span class="anchor" id="line-52"></span><p class="line862"> List configuration files in a package file </td>
+  <td><p class="line862"> rpm -qpc <em>package.rpm</em> </td>
+  <td><p class="line862"> - </td>
+</tr>
+<tr>  <td><span class="anchor" id="line-53"></span><p class="line862"> Extract files in a package </td>
+  <td><p class="line862"> rpm2cpio <em>package.rpm</em> | cpio -vid  </td>
+  <td><p class="line862"> dpkg-deb --extract <em>package.deb</em> dir-to-extract-to </td>
+</tr>
+<tr>  <td><span class="anchor" id="line-54"></span><p class="line862"> Find package that installed a file </td>
+  <td><p class="line862"> rpm -qf <em>filename</em> </td>
+  <td><p class="line862"> dpkg --search <em>filename</em> </td>
+</tr>
+<tr>  <td><span class="anchor" id="line-55"></span><p class="line862"> Find package that provides a particular file </td>
+  <td><p class="line862"> yum provides <em>filename</em> </td>
+  <td><p class="line862"> apt-file search <em>filename</em> </td>
+</tr>
+<tr style="background: #D9BB7A">  <td colspan="3" style="text-align: center"><span class="anchor" id="line-56"></span><p class="line891"><strong>Misc. Packaging System Tools</strong></td>
+</tr>
+<tr>  <td><span class="anchor" id="line-57"></span><p class="line862"> Show stats about the package cache </td>
+  <td><p class="line862"> - </td>
+  <td><p class="line862"> apt-cache stats </td>
+</tr>
+<tr>  <td><span class="anchor" id="line-58"></span><p class="line862"> Verify all installed packages </td>
+  <td><p class="line862"> rpm -Va </td>
+  <td><p class="line862"> debsums </td>
+</tr>
+<tr>  <td><span class="anchor" id="line-59"></span><p class="line862"> Remove packages from the local cache directory </td>
+  <td><p class="line862"> yum clean packages </td>
+  <td><p class="line862"> apt-get clean </td>
+</tr>
+<tr>  <td><span class="anchor" id="line-60"></span><p class="line862"> Remove only obsolete packages from the local cache directory </td>
+  <td><p class="line862"> - </td>
+  <td><p class="line862"> apt-get autoclean </td>
+</tr>
+<tr>  <td><span class="anchor" id="line-61"></span><p class="line862"> Remove header files from the local cache directory <br />
+ (forcing a new download of same on next use) </td>
+  <td><p class="line862"> yum clean headers </td>
+  <td><p class="line862"> apt-file purge </td>
+</tr>
+<tr style="background: #D9BB7A">  <td colspan="3" style="text-align: center"><span class="anchor" id="line-62"></span><p class="line891"><strong>General Packaging System Information</strong></td>
+</tr>
+<tr>  <td><span class="anchor" id="line-63"></span><p class="line862"> Package file extension </td>
+  <td><p class="line862"> *.rpm </td>
+  <td><p class="line862"> *.deb </td>
+</tr>
+<tr>  <td><span class="anchor" id="line-64"></span><p class="line862"> Repository location configuration </td>
+  <td><p class="line862"> /etc/yum.conf </td>
+  <td><p class="line862"> /etc/apt/sources.list </td>
+</tr>
+</tbody></table></div><span class="anchor" id="line-65"></span><span class="anchor" id="line-66"></span><p class="line862">Some of the information in this table was derived (with permission) from <a class="http" href="http://www.jpsdomain.org/linux/apt.html">APT and RPM Packager Lookup Tables</a>. <span class="anchor" id="line-67"></span><span class="anchor" id="line-68"></span><span class="anchor" id="line-69"></span><p class="line862">More technical information about Debian-style packaging can be found in <a class="http" href="http://www.debian.org/doc/FAQ/ch-pkg_basics.en.html">Basics of the Debian package management system</a> and the <a class="http" href="http://www.debian.org/doc/manuals/maint-guide/index.en.html">Debian New Maintainers' Guide</a>. <span class="anchor" id="line-70"></span><span class="anchor" id="line-71"></span><p class="line867">
+<h2 id="Services">Services</h2>
+<span class="anchor" id="line-72"></span><span class="anchor" id="line-73"></span><p class="line874">Services on Ubuntu are managed in a broadly similar way to those on Red Hat. <span class="anchor" id="line-74"></span><span class="anchor" id="line-75"></span><p class="line867">
+<h3 id="Graphical Tools">Graphical Tools</h3>
+<span class="anchor" id="line-76"></span><span class="anchor" id="line-77"></span><p class="line862">Services can be configured by clicking <strong>System</strong> -&gt; <strong>Administration</strong> -&gt; <strong>Services</strong>. A tool called <a class="http" href="http://www.marzocca.net/linux/bum.html">Boot-Up Manager</a> is also available. <span class="anchor" id="line-78"></span><span class="anchor" id="line-79"></span><p class="line867">
+<h3 id="Command Line Tools">Command Line Tools</h3>
+<span class="anchor" id="line-80"></span><span class="anchor" id="line-81"></span><p class="line862">Below is a table of example commands for managing services. The <em>apache</em>/<em>httpd</em> service is used as an example. <span class="anchor" id="line-82"></span><span class="anchor" id="line-83"></span><div><table><tbody><tr style="background: #D9BB7A;  text-align:center">  <td><p class="line862"> <strong>Task</strong> </td>
+  <td><p class="line862">  <strong>Red Hat / Fedora</strong>  </td>
+  <td><p class="line862"> <strong>Ubuntu</strong> </td>
+  <td><p class="line862"> <strong>Ubuntu</strong> <br />
+ (with sysv-rc-conf or sysvconfig) </td>
+</tr>
+<tr>  <td><span class="anchor" id="line-84"></span><p class="line862"> <strong>Starting/stopping services immediately</strong> </td>
+  <td><p class="line862"> service httpd start </td>
+  <td><p class="line862"> invoke-rc.d apache start </td>
+  <td><p class="line862"> service apache start </td>
+</tr>
+<tr>  <td><span class="anchor" id="line-85"></span><p class="line862"> <strong>Enabling a service at boot</strong> </td>
+  <td><p class="line862"> chkconfig httpd on </td>
+  <td><p class="line862"> update-rc.d apache defaults </td>
+  <td><p class="line862"> sysv-rc-conf apache on </td>
+</tr>
+<tr>  <td><span class="anchor" id="line-86"></span><p class="line862"> <strong>Disabling a service at boot</strong> </td>
+  <td><p class="line862"> chkconfig httpd off </td>
+  <td><p class="line862"> update-rc.d apache purge </td>
+  <td><p class="line862"> sysv-rc-conf apache off </td>
+</tr>
+</tbody></table></div><span class="anchor" id="line-87"></span><span class="anchor" id="line-88"></span><p class="line867"><strong>Note:</strong> Whereas Red Hat and Fedora servers boot into runlevel 3 by default, Ubuntu servers default to runlevel 2. <span class="anchor" id="line-89"></span><span class="anchor" id="line-90"></span><p class="line867"><strong>Note:</strong> The <tt class="backtick">service</tt> and <tt class="backtick">invoke-rc.d</tt> commands call init scripts to do the actual work.  You can also start and stop services by doing e.g. <tt class="backtick">/etc/init.d/apache&nbsp;start</tt> on Ubuntu, or <tt class="backtick">/etc/init.d/httpd&nbsp;start</tt> on Red Hat/Fedora. <span class="anchor" id="line-91"></span><span class="anchor" id="line-92"></span><span class="anchor" id="line-93"></span><p class="line867">
+<h2 id="Network">Network</h2>
+<span class="anchor" id="line-94"></span><span class="anchor" id="line-95"></span><p class="line867">
+<h3 id="Graphical Tools">Graphical Tools</h3>
+<span class="anchor" id="line-96"></span><span class="anchor" id="line-97"></span><span class="anchor" id="line-98"></span><p class="line862">Fedora/RHEL have system-config-network, ubuntu pre 10.04 had <a class="http" href="http://www.debianadmin.com/ubuntu-networking-for-basic-and-advanced-users.html">gnome-nettool</a> to edit static ip address, since 10.04 nm-connection-editor is the best choice. For Ubuntu 10.04 Studio there is only manual editing of files <a class="https" href="https://bugs.launchpad.net/ubuntu/+source/gnome-system-tools/+bug/570828">since NetworkMontor is not included</a> <span class="anchor" id="line-99"></span><span class="anchor" id="line-100"></span><p class="line867">
+<h3 id="Command Line Tools">Command Line Tools</h3>
+<span class="anchor" id="line-101"></span><p class="line862">* <a class="http" href="http://www.debianadmin.com/ubuntu-networking-for-basic-and-advanced-users.html">ubuntu networking for basic and advanced users</a>  <span class="anchor" id="line-102"></span><span class="anchor" id="bottom"></span></div><p id="pageinfo" class="info" lang="en" dir="ltr">SwitchingToUbuntu/FromLinux/RedHatEnterpriseLinuxAndFedora  (last edited 2010-08-19 20:11:42 by <span title="https://login.launchpad.net/+id/3PcPRGs @ cpe-071-077-054-021.nc.res.rr.com[71.77.54.21]"><a class="interwiki" href="https://launchpad.net/~sho-nivin" title="https://login.launchpad.net/+id/3PcPRGs @ cpe-071-077-054-021.nc.res.rr.com[71.77.54.21]">Andrew Puch</a></span>)</p>
+
+<ul class="pagelinks">
+<li><a href="/community/SwitchingToUbuntu/FromLinux">Parent Page</a></li>
+<li><a class="nbinfo" href="/community/SwitchingToUbuntu/FromLinux/RedHatEnterpriseLinuxAndFedora?action=info" rel="nofollow">Page History</a></li>
+</ul>
+
+<div id="pagebottom"></div>
+</div>
+
+
+<div id="footer">
+<hr width="550px">
+
+  <div id="ubuntulinks">
+	<p>
+	      The material on this wiki is available under a free license, see <a href="https://help.ubuntu.com/community/License">Copyright / License</a> for details<br /><b>You</b> can contribute to this wiki, see <a href="https://help.ubuntu.com/community/WikiGuide">Wiki Guide</a> for details
+	</p><br>
+  </div>
+<script src="https://ssl.google-analytics.com/urchin.js" type="text/javascript">
+</script>
+<script type="text/javascript">
+_uacct = "UA-1018242-7";
+urchinTracker();
+__utmSetVar('UbuntuWiki');
+</script>
+<script type="text/javascript">
+function togglebar() {
+    obj = document.getElementById('editbar');
+    obj2 = document.getElementById('showbarspan');
+    obj3 = document.getElementById('showbar');
+    if (obj.style.position == 'fixed') {
+        obj.style.position = 'static';
+	obj3.style.bottom = '0';
+        obj2.innerHTML = 'Show';
+    } else {
+        obj.style.position = 'fixed';
+        obj2.innerHTML = 'Hide';
+        obj3.style.bottom = '25px';
+    }
+    return false;
+}
+</script>
+
+
+</div> <!-- footer -->
+</div> <!-- layout -->
+<img id="bottomcap" alt="" src="https://help.ubuntu.com/htdocs/ubuntunew/img/cap-bottom.png">
+</div> <!-- round -->
+</body>
+</html>
+

@@ -1,3 +1,7 @@
+list ip and its acount of each oracle processes  
+for pid in `pgrep oracle`; do  pfiles $pid | awk '/peername/ {print $3}'; done | sort | uniq -c
+
+
 
 Check 32 or 64 bit:
 uname -m 

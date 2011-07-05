@@ -1,0 +1,30 @@
+
+-- Not fixed yet
+sufficient swap size is not available on node "solaris10_64" [Required = 4GB (4194304.0KB) ; Found = 511.9961MB (524284.0KB)]
+
+
+Error Message:PRVF-4354 : Proper hard limit for resource "maximum user processes" not found on node "solaris10_64" [Expected = "16384" ; Found = "16373"]
+
+Error Message:PRVF-7543 : OS Kernel parameter "project.max-shm-memory" does not have proper value on node "solaris10_64" [Expected = "4294967295" ; Found = "534657024"].
+
+Error Message:PRVF-7543 : OS Kernel parameter "tcp_smallest_anon_port" does not have proper value on node "solaris10_64" [Expected = "9000" ; Found = "32768"].
+
+Error Message:PRVF-7543 : OS Kernel parameter "tcp_largest_anon_port" does not have proper value on node "solaris10_64" [Expected = "65500" ; Found = "65535"].
+
+OS Kernel parameter "udp_smallest_anon_port" does not have proper value on node "solaris10_64" [Expected = "9000" ; Found = "32768"].
+
+OS Kernel parameter "udp_largest_anon_port" does not have proper value on node "solaris10_64" [Expected = "65500" ; Found = "65535"].
+
+oracle_home direcotry cannot be /package/oracle
+
+
+-- Fixed -----------------------------
+
+Required physical memory = 4GB 
+
+Error Message:PRVF-7501 : Sufficient space is not available at location "/tmp" on node "solaris10_64" [Required space = 1GB ]
+
+
+
+
+
