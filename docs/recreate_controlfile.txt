@@ -1,0 +1,89 @@
+http://www.articles.freemegazone.com/recovering-controlfile-without-resetlogs.php
+
+Oracle always requires you to recover and then open the database with resetlogs. However you do not always need to do a resetlogs when you open the database.
+If you recreate the controlfile rather than restoring a backup then Oracle allows you to open the database normally. 
+Normally all information in controlfile like RMAN configuration and records, incarnation table etc will be lost so it is preferred to keep the old file.
+
+Opening Database:
+
+Consider a scenario where our attempt to open a database has failed. We have already restored a backup controlfile and mounted it.
+
+SQL> alter database open noresetlogs; 
+alter database open noresetlogs 
+* 
+ERROR at line 1: 
+ORA-01588: must use RESETLOGS option for database open
+
+Controlfile Backup:
+
+You can make a backup of your controlfile by using below command.
+
+SQL> alter database backup controlfile to trace  as '/u04/oracle/oradata/jt10g/newctl.sql'; 
+
+Incarnation Table:
+
+The contents of the incarnation table will be lost. You can view the contents of incarnation table by running below command.
+
+SQL> select * from v$database_incarnation;
+
+Recreating Control File:
+
+You can recreate the control file as long as you can generate the proper CREATE CONTROLFILE statement. 
+If you know your datafile and logfile layout then you can generate this statement even with no backup of anything. 
+The best way to re-create control file is with backup to trace. Continued..
+
+
+
+First of all we will start the instance. No control file will be mounted at this stage. 
+When you recreate the controlfile it will read the CONTROL_FILES initialization parameter and overwrite any existing files.
+
+SQL> shutdown immediate; 
+ORA-01109: database not open
+
+Database dismounted. 
+ORACLE instance shut down.
+
+SQL> startup nomount 
+ORACLE instance started.
+
+SQL> CREATE CONTROLFILE REUSE DATABASE "JT10G" NORESETLOGS NOARCHIVELOG 
+2 MAXLOGFILES 16 
+3 MAXLOGMEMBERS 3 
+4 MAXDATAFILES 100 
+5 MAXINSTANCES 8 
+6 MAXLOGHISTORY 292 
+7 LOGFILE 
+8 GROUP 1 '/u04/oracle/oradata/jt10g/redo01.log' SIZE 50M, 
+9 GROUP 2 '/u04/oracle/oradata/jt10g/redo02.log' SIZE 50M, 
+10 GROUP 3 '/u04/oracle/oradata/jt10g/redo03.log' SIZE 50M 
+11 DATAFILE 
+12 '/u04/oracle/oradata/jt10g/system01.dbf', 
+13 '/u04/oracle/oradata/jt10g/undotbs01.dbf', 
+14 '/u04/oracle/oradata/jt10g/sysaux01.dbf', 
+15 '/u04/oracle/oradata/jt10g/users01.dbf', 
+16 '/u04/oracle/oradata/jt10g/example01.dbf' 
+17 CHARACTER SET WE8ISO8859P1 
+18 ;
+
+Control file created.
+
+SQL> ALTER DATABASE OPEN;
+
+Database altered.
+
+Recreating tempfiles:
+
+You will also need to recreate your tempfiles. The appropriate statements will be in the trace file.
+
+SQL> ALTER TABLESPACE TEMP ADD TEMPFILE '/u04/oracle/oradata/jt10g/temp01.dbf' REUSE; 
+
+Incarnation Table:
+
+You can verify that all information is lost in controlfile by examining the incarnation table.
+
+SQL> select * from v$database_incarnation; 
+
+Final Thoughts:
+
+To conclude I would say that this article will help you recover controlfile without a resetlogs. 
+I recommend using the resetlogs and keeping the original controlfile as the incarnations will help you keep track of changes to you database.

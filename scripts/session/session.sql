@@ -1,0 +1,1 @@
+select sid, username, osuser, status,machine, program, sql_id, event from v$session order by username,osuser, machine;
