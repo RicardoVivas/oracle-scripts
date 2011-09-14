@@ -1,0 +1,36 @@
+umask 022
+
+ORACLE_BASE=/u01/app/oracle
+
+ORACLE_HOME=/u01/app/oracle/product/11.2.0/db_1
+
+ORACLE_SID=D11G
+
+LD_LIBRARY_PATH=$ORACLE_HOME/lib
+
+PATH=$PATH:/usr/local/bin:/usr/sbin:/usr/bin:/usr/openwin/bin:/usr/ucb:$ORACLE_HOME/bin
+
+export ORACLE_BASE ORACLE_HOME ORACLE_SID LD_LIBRARY_PATH PATH
+
+TEMP=/tmp
+
+TMPDIR=/tmp
+
+export TEMP TMPDIR
+
+ulimit -t unlimited
+
+ulimit -f unlimited
+
+ulimit -d unlimited
+
+ulimit -s unlimited
+
+ulimit -v unlimited
+
+if [ -t 0 ]; then
+
+stty intr ^C
+
+fi
+

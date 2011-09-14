@@ -1,8 +1,7 @@
----- Ubuntu by Vagrant -----
-$ gem install vagrant
-$ vagrant box add base http://files.vagrantup.com/lucid32.box
-$ vagrant init
-$ vagrant up
+If you just type in the vagrant up, it will use the box specified in ./Vagrantfile
+
+
+in solaris vagrant, use "pfexec bash" to get root bash shell. In ubuntu, use "sudo bash"
 
 --  Solaris 10 with puppet by Vagrant -----
 $ gem install vagrant
@@ -10,14 +9,16 @@ $ vagrant box add puppet-solaris-10-64 http://puppetlabs.s3.amazonaws.com/pub/so
 $ vagrant init puppet-solaris-10-64
 $ vagrant up
 
+---- Ubuntu by Vagrant -----
+$ gem install vagrant
+$ vagrant box add base http://files.vagrantup.com/lucid32.box
+$ vagrant init
+$ vagrant up
+
+
 
 ----- Solaris SXP created by Vagrant -----
 see file Vagrantfile.sxp
-
-
-
-
-
 
 List of boxes : http://www.vagrantbox.es/
 

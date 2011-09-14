@@ -35,6 +35,8 @@ execute dbms_stats.gather_system_stats(gathering_mode=>'STOP');
 execute dbms_stats.delete_system_stats(NULL, NULL,NULL);
 
 
+select * from SYS.aux_stats$
+
 
 
 select /*+ gather_plan_statistics */ ... from ... ;

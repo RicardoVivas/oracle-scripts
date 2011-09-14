@@ -1,0 +1,6 @@
+check oraInventory/ContentsXML/inventory.xml for oracle homes
+
+
+/package/oracle/gridcontrol/agent10g/oui/bin/runInstaller -silent -deinstall "REMOVE_HOMES={/package/oracle/gridcontrol/agent10g}" -removeallfiles
+/package/oracle/product/10.2.0/oui/bin/runInstaller -silent -deinstall "REMOVE_HOMES={/package/oracle/product/10.2.0}" -removeallfiles
+

@@ -122,16 +122,13 @@ It's usually OK, but if your filter is inefficient and/or you haven't limited th
 
 
 
-
+------ Add Packages ----------------------------
 
 To see what package a file is associated with.
 pkgchk -l -p /path/to/filename
 
 list package files: pkgchk -v SUNWgtar
-
-
-
-
+ pkgadd –d Packagname
 
 
 mount iso file
@@ -142,4 +139,8 @@ $ pfexec mount -f hsfs /dev/lofi/1 /mnt/
 
 install missing en_GB locale 
 $ pfexec localeadm -a en_GB -d /mnt
+
+
+
+
 

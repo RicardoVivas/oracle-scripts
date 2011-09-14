@@ -92,6 +92,15 @@ VBoxManage storageattach rac2 --storagectl "SATA Controller" --port 5 --device 0
   
 
 
+The doc use IP:                
+hostname: rac1.localdomain
+IP Address eth0: (public address) 192.168.2.101/102 
+Default Gateway eth0: 192.168.2.1 (public address)
+IP Address eth1: (private address)192.168.0.101/102 
+Default Gateway eth1: none
+
+
+
 
 
 
