@@ -1,10 +1,11 @@
 Loss of control files does not means incomplete recovery.
 
+
 If all the online log files are intact, use the following command to re-create the control file
 SQL> ALTER DATABASE BACKUP CONTROLFILE TO TRACE NORESETLOGS;
-
 Or
 Recover using a backup control file.
+
 If you are unable to create a control file using the previous procedure, 
 then you can use a backup control file, perform complete recovery, and open the database with the 
 RESETLOGS option

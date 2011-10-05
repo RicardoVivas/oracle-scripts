@@ -2,6 +2,7 @@
 2. Instance is still running. 
 3. Try to rman target / catalog <connectionString>, it failed and report "cannot open the specified controlfile"
 4. Connect as sysdba, shutdown immediate and failed, reporting "cannot open the specified controlfile"
+
 5. ABORT:  shutdown abort and rman target / catalog <connectionString>, succeed
 
 6. DBID:   Find out the DBID from rc_database in the catalog.

@@ -15,10 +15,10 @@ recover  tablespace users;
 sql 'alter tablespace users online';
 
 For datafile:
-sql 'alter datafile 11 offline'; or in sql*plus: alter database datafile 'full_path_name' offline;
+sql 'alter database datafile 11 offline'; or in sql*plus: alter database datafile 'full_path_name' offline;
 restore  datafile   11;
 recover  datafile   11;
-sql 'alter datafile 11  online';
+sql 'alter database datafile 11  online';
 
 
 3  Loss of unarchived online log
