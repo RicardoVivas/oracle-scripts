@@ -1,0 +1,29 @@
+P49
+
+service {"httpd": require => Package["httpd"]}
+
+We capitalizd the class statement to indicate we're referring to another class and encapsulated the name of the class in block brackets
+
+
+
+
+alter database add standby logfile thread 1 group 7  '/oradb/redo1/ssap/stdbyredo1a.log' size 52428800;
+alter database add standby logfile member            '/oradb/redo2/ssap/stdbyredo1b.log'  to group 7;
+
+alter database add standby logfile thread 1 group 8  '/oradb/redo1/ssap/stdbyredo2a.log' size 52428800;
+alter database add standby logfile member            '/oradb/redo2/ssap/stdbyredo2b.log'  to group 8;
+
+alter database add standby logfile thread 1 group 9  '/oradb/redo1/ssap/stdbyredo3a.log' size 52428800;
+alter database add standby logfile member            '/oradb/redo2/ssap/stdbyredo3b.log'  to group 9;
+
+alter database add standby logfile thread 1 group 10  '/oradb/redo1/ssap/stdbyredo4a.log' size 52428800;
+alter database add standby logfile member             '/oradb/redo2/ssap/stdbyredo4b.log'  to group 10;
+
+alter database add standby logfile thread 1 group 11  '/oradb/redo1/ssap/stdbyredo5a.log' size 52428800;
+alter database add standby logfile member             '/oradb/redo2/ssap/stdbyredo5b.log'  to group 11;
+
+alter database add standby logfile thread 1 group 12  '/oradb/redo1/ssap/stdbyredo6a.log' size 52428800;
+alter database add standby logfile member             '/oradb/redo2/ssap/stdbyredo6b.log'  to group 12;
+
+alter database add standby logfile thread 1 group 13  '/oradb/redo1/ssap/stdbyredo7a.log' size 52428800;
+alter database add standby logfile member             '/oradb/redo2/ssap/stdbyredo7b.log'  to group 13;

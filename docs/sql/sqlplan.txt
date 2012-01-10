@@ -1,6 +1,7 @@
 15.6 Importing and Exporting SQL Plan Baselines
 
-Oracle Database supports the export and import of SQL plan baselines using its import and export utilities or Oracle Data Pump. Use the DBMS_SPM package to define a staging table, which is then used to pack and unpack SQL plan baselines.
+Oracle Database supports the export and import of SQL plan baselines using its import and export utilities or Oracle Data Pump. 
+Use the DBMS_SPM package to define a staging table, which is then used to pack and unpack SQL plan baselines.
 
 To import a set of SQL plan baselines from one system to another:
 
@@ -8,7 +9,8 @@ On the original system, create a staging table using the CREATE_STGTAB_BASELINE 
 
 BEGIN
   DBMS_SPM.CREATE_STGTAB_BASELINE(
-    table_name => 'stage1');
+    table_name => 'stage1',
+    table_owner => 'sysas');
 END;
 /
 This example creates a staging table named stage1.
@@ -20,16 +22,16 @@ my_plans number;
 BEGIN
   my_plans := DBMS_SPM.PACK_STGTAB_BASELINE(
     table_name => 'stage1',
+    TABLE_OWNER => 'SYSAS',
     enabled => 'yes',
-    creator => 'dba1');
+    creator => 'SB2');
 END;
 /
-This example packs all enabled plan baselines created by user dba1 into the staging table stage1. You can select SQL plan baselines using the plan name (plan_name), SQL handle (sql_handle), or by any other plan criteria. The table_name parameter is mandatory.
+This example packs all enabled plan baselines created by user SB2 into the staging table stage1. 
+You can select SQL plan baselines using the plan name (plan_name), SQL handle (sql_handle), or by any other plan criteria. The table_name parameter is mandatory.
 
 Export the staging table stage1 into a flat file using the export command or Oracle Data Pump.
-
 Transfer the flat file to the target system.
-
 Import the staging table stage1 from the flat file using the import command or Oracle Data Pump.
 
 Unpack the SQL plan baselines from the staging table into the SQL management base on the target system using the UNPACK_STGTAB_BASELINE function:
@@ -38,9 +40,12 @@ DECLARE
 my_plans number;
 BEGIN
   my_plans := DBMS_SPM.UNPACK_STGTAB_BASELINE(
-    table_name => 'stage1',
-    fixed => 'yes');
+    table_name => 'STAGE1',
+    table_owner => 'SYSAS',
+    creator => 'SB2',
+   enabled => 'YES');
 END;
 /
+
 This example unpacks all fixed plan baselines stored in the staging table stage1.
 

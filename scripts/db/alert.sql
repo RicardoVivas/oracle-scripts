@@ -1,0 +1,1 @@
+select * from x$DBGALERTEXT order by originating_timestamp desc;

@@ -16,23 +16,16 @@ select * from dba_scheduler_window_log order by log_date desc;
 
 
 BEGIN
-DBMS_SCHEDULER.DISABLE(
-name=>'"SYS"."WEEKNIGHT_WINDOW"',
-force=>TRUE);
+DBMS_SCHEDULER.DISABLE(name=>'"SYS"."WEEKNIGHT_WINDOW"',force=>TRUE);
 END;
 
 BEGIN
-DBMS_SCHEDULER.SET_ATTRIBUTE(
-name=>'"SYS"."WEEKNIGHT_WINDOW"',
-attribute=>'START_DATE',
-value=>to_timestamp_tz('2011-04-07 +1:00', 'YYYY-MM-DD TZH:TZM'));
+DBMS_SCHEDULER.SET_ATTRIBUTE(name=>'"SYS"."WEEKNIGHT_WINDOW"',attribute=>'START_DATE',value=>to_timestamp_tz('2011-04-07 +1:00', 'YYYY-MM-DD TZH:TZM'));
 END;
 
 BEGIN
-DBMS_SCHEDULER.ENABLE(
-name=>'"SYS"."WEEKNIGHT_WINDOW"');
+DBMS_SCHEDULER.ENABLE(name=>'"SYS"."WEEKNIGHT_WINDOW"');
 END;
-
 
 
 DBMS_SCHEDULER.DROP_JOB(JOB_NAME => 'my_jobname');
@@ -41,10 +34,12 @@ DBMS_SCHEDULER.DROP_JOB(JOB_NAME => 'my_jobname');
 -- 11g ------
 
 
--- displays per-window history of job execution counts for each automated maintenance task. This information is viewable in the Job History page of Enterprise Manager.
-select * from dba_autotask_client_history
+-- displays per-window history of job execution counts for each automated maintenance task. 
+-- This information is viewable in the Job History page of Enterprise Manager.
+select * from dba_autotask_client_history order by window_start_time desc
 
--- displays the history of automated maintenance task job runs. Jobs are added to this view after they finish executing.
+-- displays the history of automated maintenance task job runs.
+-- Jobs are added to this view after they finish executing.
 select * from dba_autotask_job_history order by job_start_time desc
 
 -- displays information about current and past automated maintenance tasks.
