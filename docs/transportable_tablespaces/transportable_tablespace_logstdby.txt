@@ -1,6 +1,6 @@
  Importing a Transportable Tablespace to the Primary Database
 
-Perform the following steps to import a tablespace to the primary database.
+Perform the following steps to import a tablespace to the primary/standby database.
 
    1.
 

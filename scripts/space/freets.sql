@@ -23,4 +23,4 @@ from
 (select  tablespace_name, sum(bytes_free) total_free_bytes from v$temp_space_header group by tablespace_name ) th
 where tf.tablespace_name = th.tablespace_name
 group by tf.tablespace_name,tf.total_bytes, th.total_free_bytes
-ORDER BY 4 
+ORDER BY 4 ;

@@ -1,5 +1,5 @@
 
-----------As root---------------------------
+----------As sysdba---------------------------
 create user hsuntest identified by hsuntest748348u0 default tablespace users quota unlimited on users;
 grant create session, create table, create view, create trigger to hsuntest;
 

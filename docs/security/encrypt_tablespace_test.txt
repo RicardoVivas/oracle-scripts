@@ -1,0 +1,585 @@
+oracle@molucca$ mkdir /app/oracle/admin/hsun/tde_wallet
+
+oracle@molucca$ sqlplus / as sysdba
+SYS@hsun SQL>select * from v$encryption_wallet;
+
+WRL_TYPE
+--------------------
+WRL_PARAMETER
+----------------------------------
+STATUS
+------------------
+file
+/app/oracle/admin/hsun/tde_wallet/
+CLOSED
+
+
+oracle@molucca$ orapki wallet create -wallet /app/oracle/admin/hsun/tde_wallet
+   
+oracle@molucca$ ls -l /app/oracle/admin/hsun/tde_wallet/
+total 1
+-rw-------   1 oracle   oinstall    3512 Jan 27 12:47 ewallet.p12
+
+
+oracle@molucca$ orapki wallet create -wallet /app/oracle/admin/hsun/tde_wallet  -auto_login_local
+  
+oracle@molucca$ ls -l /app/oracle/admin/hsun/tde_wallet
+total 17
+-rw-------   1 oracle   oinstall    3589 Jan 27 12:50 cwallet.sso
+-rw-------   1 oracle   oinstall    3512 Jan 27 12:47 ewallet.p12
+
+oracle@molucca$ sqlplus / as sysdba
+
+SYS@hsun SQL>CREATE TABLESPACE securespace
+DATAFILE '/app/oracle/oradata/hsun/secure01.dbf'
+SIZE 150M
+ENCRYPTION
+DEFAULT STORAGE(ENCRYPT);
+
+ERROR at line 1:
+ORA-28374: typed master key not found in wallet
+
+SYS@hsun SQL>select * from v$encryption_wallet;
+
+WRL_TYPE
+--------------------
+WRL_PARAMETER
+----------------------------------
+STATUS
+------------------
+file
+/app/oracle/admin/hsun/tde_wallet/
+OPEN_NO_MASTER_KEY
+
+
+SYS@hsun SQL>alter system switch logfile;
+
+System altered.
+
+SYS@hsun SQL>/
+
+System altered.
+
+SYS@hsun SQL>/
+
+System altered.
+
+SYS@hsun SQL>shutdown immediate;
+SYS@hsun SQL>startup
+
+SYS@hsun SQL>select * from v$encryption_wallet;
+
+WRL_TYPE
+--------------------
+WRL_PARAMETER
+----------------------------------
+STATUS
+------------------
+file
+/app/oracle/admin/hsun/tde_wallet/
+CLOSED
+
+
+SYS@hsun SQL>alter system set encryption wallet open identified by "password";
+
+System altered.
+
+SYS@hsun SQL>select * from v$encryption_wallet;
+
+WRL_TYPE
+--------------------
+WRL_PARAMETER
+----------------------------------
+STATUS
+------------------
+file
+/app/oracle/admin/hsun/tde_wallet/
+OPEN_NO_MASTER_KEY
+
+
+SYS@hsun SQL>alter system set encryption wallet  close identified by "password";
+
+System altered.
+
+SYS@hsun SQL>select * from v$encryption_wallet;
+
+WRL_TYPE
+--------------------
+WRL_PARAMETER
+----------------------------------
+STATUS
+------------------
+file
+/app/oracle/admin/hsun/tde_wallet/
+CLOSED
+
+
+oracle@molucca$ rm  /app/oracle/admin/hsun/tde_wallet/ewallet.p12 
+
+oracle@molucca$ sqlplus / as sysdba
+
+SYS@hsun SQL>alter system set encryption wallet open identified by "password";
+alter system set encryption wallet open identified by "password"
+*
+ERROR at line 1:
+ORA-28367: wallet does not exist
+
+
+SYS@hsun SQL>alter system set encryption key identified by "password";
+
+System altered.
+
+SYS@hsun SQL>select * from v$encryption_wallet;
+
+WRL_TYPE
+--------------------
+WRL_PARAMETER
+----------------------------------
+STATUS
+------------------
+file
+/app/oracle/admin/hsun/tde_wallet/
+OPEN
+
+
+SYS@hsun SQL>alter system set encryption wallet  close identified by "password";
+
+System altered.
+
+SYS@hsun SQL>select * from v$encryption_wallet;
+
+WRL_TYPE
+--------------------
+WRL_PARAMETER
+----------------------------------
+STATUS
+------------------
+file
+/app/oracle/admin/hsun/tde_wallet/
+CLOSED
+
+
+SYS@hsun SQL>exit
+Disconnected from Oracle Database 11g Enterprise Edition Release 11.2.0.2.0 - 64bit Production
+With the Partitioning and Real Application Testing options
+oracle@molucca$ rm  /app/oracle/admin/hsun/tde_wallet/ewallet.p12 
+oracle@molucca$ sqlplus / as sysdba
+oracle@molucca$ orapki wallet create -wallet /app/oracle/admin/hsun/tde_wallet 
+Oracle PKI Tool : Version 11.2.0.2.0 - Production
+Copyright (c) 2004, 2010, Oracle and/or its affiliates. All rights reserved.
+
+Enter password:      2   l
+   
+Enter password again:       llll
+   
+oracle@molucca$ sqlplus / as sysdba
+
+SQL*Plus: Release 11.2.0.2.0 Production on Fri Jan 27 12:56:22 2012
+
+Copyright (c) 1982, 2010, Oracle.  All rights reserved.
+
+
+Connected to:
+Oracle Database 11g Enterprise Edition Release 11.2.0.2.0 - 64bit Production
+With the Partitioning and Real Application Testing options
+
+SYS@hsun SQL>select * from v$encryption_wallet;
+
+WRL_TYPE
+--------------------
+WRL_PARAMETER
+----------------------------------
+STATUS
+------------------
+file
+/app/oracle/admin/hsun/tde_wallet/
+CLOSED
+
+
+SYS@hsun SQL>alter system set encryption wallet  close identified by "password";
+alter system set encryption wallet  close identified by "password"
+*
+ERROR at line 1:
+ORA-28365: wallet is not open
+
+
+SYS@hsun SQL>alter system set encryption wallet open  identified by "password";
+
+System altered.
+
+SYS@hsun SQL>select * from v$encryption_wallet;
+
+WRL_TYPE
+--------------------
+WRL_PARAMETER
+----------------------------------
+STATUS
+------------------
+file
+/app/oracle/admin/hsun/tde_wallet/
+OPEN_NO_MASTER_KEY
+
+
+SYS@hsun SQL>alter system set encryption wallet close  identified by "password";
+
+System altered.
+
+SYS@hsun SQL>alter system switch logfile;
+
+System altered.
+
+SYS@hsun SQL>/
+
+System altered.
+
+SYS@hsun SQL>/
+
+System altered.
+
+SYS@hsun SQL>exit
+Disconnected from Oracle Database 11g Enterprise Edition Release 11.2.0.2.0 - 64bit Production
+With the Partitioning and Real Application Testing options
+oracle@molucca$ rm  /app/oracle/admin/hsun/tde_wallet/ewallet.p12 
+
+oracle@molucca$ sqlplus / as sysdba
+
+
+SYS@hsun SQL>alter system set encryption key identified by "password";
+
+System altered.
+
+SYS@hsun SQL>select * from v$encryption_wallet;
+
+WRL_TYPE
+--------------------
+WRL_PARAMETER
+----------------------------------
+STATUS
+------------------
+file
+/app/oracle/admin/hsun/tde_wallet/
+OPEN
+
+
+SYS@hsun SQL>exit
+
+oracle@molucca$ orapki wallet create -wallet /app/oracle/admin/hsun/tde_wallet  -auto_login_local
+   
+oracle@molucca$ sqlplus / as sysdba
+
+SYS@hsun SQL>select * from v$encryption_wallet;
+
+WRL_TYPE
+--------------------
+WRL_PARAMETER
+----------------------------------
+STATUS
+------------------
+file
+/app/oracle/admin/hsun/tde_wallet/
+OPEN
+
+
+SYS@hsun SQL>shutdown immediate;
+SYS@hsun SQL>startup
+SYS@hsun SQL>select * from v$encryption_wallet;
+
+WRL_TYPE
+--------------------
+WRL_PARAMETER
+----------------------------------
+STATUS
+------------------
+file
+/app/oracle/admin/hsun/tde_wallet/
+OPEN
+
+
+SYS@hsun SQL>shutdown immediate;
+SYS@hsun SQL>startup
+SYS@hsun SQL>select * from v$encryption_wallet;
+
+WRL_TYPE
+--------------------
+WRL_PARAMETER
+----------------------------------
+STATUS
+------------------
+file
+/app/oracle/admin/hsun/tde_wallet/
+OPEN
+
+
+SYS@hsun SQL>alter system set encryption wallet close;
+
+System altered.
+
+SYS@hsun SQL>select * from v$encryption_wallet;
+
+WRL_TYPE
+--------------------
+WRL_PARAMETER
+----------------------------------
+STATUS
+------------------
+file
+/app/oracle/admin/hsun/tde_wallet/
+OPEN
+
+
+SYS@hsun SQL>alter system set encryption wallet close;
+
+System altered.
+
+SYS@hsun SQL>shutdown immediate;
+
+oracle@molucca$ rm /app/oracle/admin/hsun/tde_wallet/cwallet.sso 
+
+oracle@molucca$ sqlplus / as sysdba
+
+SYS@hsun SQL>startup
+SYS@hsun SQL>select * from v$encryption_wallet;
+
+WRL_TYPE
+--------------------
+WRL_PARAMETER
+----------------------------------
+STATUS
+------------------
+file
+/app/oracle/admin/hsun/tde_wallet/
+CLOSED
+
+
+SYS@hsun SQL>alter system set encryption wallet open identified by "password";
+
+System altered.
+
+SYS@hsun SQL>select * from v$encryption_wallet;
+
+WRL_TYPE
+--------------------
+WRL_PARAMETER
+----------------------------------
+STATUS
+------------------
+file
+/app/oracle/admin/hsun/tde_wallet/
+OPEN
+
+
+SYS@hsun SQL>CREATE TABLESPACE securespace
+DATAFILE '/app/oracle/oradata/hsun/secure01.dbf'
+SIZE 150M
+ENCRYPTION
+DEFAULT STORAGE(ENCRYPT);
+    
+Tablespace created.
+
+SYS@hsun SQL>
+SYS@hsun SQL>create table  person (id number, name varchar2(20))  tablespace securespace;
+
+Table created.
+
+SYS@hsun SQL>insert into person values (1, 'hongfeng');
+
+1 row created.
+
+SYS@hsun SQL>commit;
+
+Commit complete.
+
+SYS@hsun SQL>shutdown immediate;
+SYS@hsun SQL>startup
+
+SYS@hsun SQL>select * from person;
+select * from person
+              *
+ERROR at line 1:
+ORA-28365: wallet is not open
+
+
+SYS@hsun SQL>alter system set encryption wallet open identified by "password";
+
+System altered.
+
+SYS@hsun SQL>select * from person;
+
+        ID NAME
+---------- --------------------
+         1 hongfeng
+
+SYS@hsun SQL>exit
+
+oracle@molucca$ orapki wallet create -wallet /app/oracle/admin/hsun/tde_wallet -auto_login_local
+
+   
+oracle@molucca$ sqlplus / as sysdba
+
+SYS@hsun SQL>select * from v$encryption_wallet;
+
+WRL_TYPE
+--------------------
+WRL_PARAMETER
+----------------------------------
+STATUS
+------------------
+file
+/app/oracle/admin/hsun/tde_wallet/
+OPEN
+
+
+SYS@hsun SQL>shutdown immediate;
+SYS@hsun SQL>startup
+SYS@hsun SQL>select * from v$encryption_wallet;
+
+WRL_TYPE
+--------------------
+WRL_PARAMETER
+----------------------------------
+STATUS
+------------------
+file
+/app/oracle/admin/hsun/tde_wallet/
+OPEN
+
+
+SYS@hsun SQL>select * from person;
+
+        ID NAME
+---------- --------------------
+         1 hongfeng
+
+
+oracle@molucca$ orapki wallet change_pwd -wallet /app/oracle/admin/hsun/tde_wallet 
+Oracle PKI Tool : Version 11.2.0.2.0 - Production
+Copyright (c) 2004, 2010, Oracle and/or its affiliates. All rights reserved.
+
+Enter wallet password:       llll
+   
+New password:
+Enter wallet password:          88
+   
+oracle@molucca$ sqlplus / as sysdba
+
+SQL*Plus: Release 11.2.0.2.0 Production on Fri Jan 27 13:41:30 2012
+
+Copyright (c) 1982, 2010, Oracle.  All rights reserved.
+
+
+Connected to:
+Oracle Database 11g Enterprise Edition Release 11.2.0.2.0 - 64bit Production
+With the Partitioning and Real Application Testing options
+
+SYS@hsun SQL>shutdown immediate;
+Database closed.
+Database dismounted.
+ORACLE instance shut down.
+SYS@hsun SQL>startup
+ORACLE instance started.
+
+Total System Global Area  576221184 bytes
+Fixed Size                  2226232 bytes
+Variable Size             373295048 bytes
+Database Buffers          192937984 bytes
+Redo Buffers                7761920 bytes
+Database mounted.
+Database opened.
+SYS@hsun SQL>select * from person;
+
+        ID NAME
+---------- --------------------
+         1 hongfeng
+
+ 
+oracle@molucca$ mv /app/oracle/admin/hsun/tde_wallet/
+cwallet.sso  ewallet.p12  
+oracle@molucca$ mv /app/oracle/admin/hsun/tde_wallet/* /app/oracle/admin/hsun/tde_backup
+oracle@molucca$ ls -l /app/oracle/admin/hsun/tde_backup
+total 8
+-rw-------   1 oracle   oinstall    1387 Jan 27 13:41 cwallet.sso
+-rw-------   1 oracle   oinstall    1310 Jan 27 13:41 ewallet.p12
+oracle@molucca$ sqlplus / as sysdba
+
+SQL*Plus: Release 11.2.0.2.0 Production on Fri Jan 27 14:30:47 2012
+
+Copyright (c) 1982, 2010, Oracle.  All rights reserved.
+
+
+Connected to:
+Oracle Database 11g Enterprise Edition Release 11.2.0.2.0 - 64bit Production
+With the Partitioning and Real Application Testing options
+
+SYS@hsun SQL>shutdown immediate;
+ORA-01109: database not open
+
+
+Database dismounted.
+ORACLE instance shut down.
+SYS@hsun SQL>startup
+ORACLE instance started.
+
+Total System Global Area  576221184 bytes
+Fixed Size                  2226232 bytes
+Variable Size             373295048 bytes
+Database Buffers          192937984 bytes
+Redo Buffers                7761920 bytes
+Database mounted.
+Database opened.
+SYS@hsun SQL>select * from v$encryption_wallet;
+
+WRL_TYPE
+--------------------
+WRL_PARAMETER
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+STATUS
+------------------
+file
+/app/oracle/admin/hsun/tde_wallet/
+CLOSED
+
+
+SYS@hsun SQL>select * from hsun.person;
+select * from hsun.person
+                   *
+ERROR at line 1:
+ORA-28365: wallet is not open
+
+
+SYS@hsun SQL>exit
+Disconnected from Oracle Database 11g Enterprise Edition Release 11.2.0.2.0 - 64bit Production
+With the Partitioning and Real Application Testing options
+oracle@molucca$ cp  /app/oracle/admin/hsun/tde_backup/
+cwallet.sso  ewallet.p12  
+oracle@molucca$ cp  /app/oracle/admin/hsun/tde_backup/cwallet.sso  /app/oracle/admin/hsun/tde_wallet/
+oracle@molucca$ sqlplus / as sysdba
+
+SQL*Plus: Release 11.2.0.2.0 Production on Fri Jan 27 14:31:57 2012
+
+Copyright (c) 1982, 2010, Oracle.  All rights reserved.
+
+
+Connected to:
+Oracle Database 11g Enterprise Edition Release 11.2.0.2.0 - 64bit Production
+With the Partitioning and Real Application Testing options
+
+SYS@hsun SQL>alter system set encryption wallet open;
+                                      *
+ERROR at line 1:
+ORA-28356: invalid open wallet syntax
+
+
+SYS@hsun SQL>shutdown immediate;
+SYS@hsun SQL>startup
+
+SYS@hsun SQL>select * from hsun.person;
+
+        ID NAME
+---------- ----------------------------------------
+         1 peter
+
+
+
+      
+         
+         
