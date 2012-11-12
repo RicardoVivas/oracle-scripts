@@ -28,7 +28,6 @@ BEGIN
 END;
 /
 This example packs all enabled plan baselines created by user SB2 into the staging table stage1. 
-You can select SQL plan baselines using the plan name (plan_name), SQL handle (sql_handle), or by any other plan criteria. The table_name parameter is mandatory.
 
 Export the staging table stage1 into a flat file using the export command or Oracle Data Pump.
 Transfer the flat file to the target system.

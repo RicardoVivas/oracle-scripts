@@ -1,6 +1,10 @@
--- Within one hour
+rem  
+rem Only show data during the last hour; For older data, use DBA_HIST_SYSMETRIC_HISTORY 
+rem 
+
 select  metric_name, to_char(value,'9,999,999') val, metric_unit, begin_time, round(intsize_csec/100) interval_sec 
-from v$sysmetric_history where intsize_csec > 5000 and value > 10 and metric_name in 
+from v$sysmetric_history 
+where intsize_csec > 5000 and value > 10 and metric_name in 
 ('Consistent Read Gets Per Sec', 'DB Block Changes Per Sec', 'Database CPU Time Ratio',
 'Executions Per Sec', 'Logical Reads Per Sec', 
 'Network Traffic Volume Per Sec', 'Physical Read Bytes Per Sec',

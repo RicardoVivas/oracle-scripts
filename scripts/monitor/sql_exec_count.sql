@@ -20,13 +20,13 @@ create table uow_sqlexec_change
 as
 select b.sql_id, 
  b.child_number, b.command_type, b.parsing_schema_name,
- (b.fetches - a.fetches)/((sysdate - log_time) * 3600 * 24) fetches, 
- (b.executions - a.executions)/((sysdate - log_time) * 3600 * 24) executions,
- (b.rows_processed - a.rows_processed)/((sysdate - log_time) * 3600 * 24) rows_processed, 
- (b.DISK_READS - a.disk_reads)/((sysdate - log_time) * 3600 * 24) disk_reads, 
- (b.buffer_gets - a.buffer_gets)/((sysdate - log_time) * 3600 * 24) buffer_gets, 
- (b.physical_read_bytes - b.physical_read_bytes)/((sysdate - log_time) * 3600 * 24) physical_read_bytes, 
- (b.physical_write_bytes - a.physical_write_bytes)/((sysdate - log_time) * 3600 * 24) physical_write_bytes , 
+ round((b.fetches - a.fetches)/((sysdate - log_time) * 3600 * 24),1) fetches, 
+ round((b.executions - a.executions)/((sysdate - log_time) * 3600 * 24),1) executions,
+ round((b.rows_processed - a.rows_processed)/((sysdate - log_time) * 3600 * 24),1) rows_processed, 
+ round((b.DISK_READS - a.disk_reads)/((sysdate - log_time) * 3600 * 24),1) disk_reads, 
+ round((b.buffer_gets - a.buffer_gets)/((sysdate - log_time) * 3600 * 24),1) buffer_gets, 
+ round((b.physical_read_bytes - b.physical_read_bytes)/((sysdate - log_time) * 3600 * 24),1) physical_read_bytes, 
+ round((b.physical_write_bytes - a.physical_write_bytes)/((sysdate - log_time) * 3600 * 24),1) physical_write_bytes , 
  round((sysdate - log_time) * 3600 * 24) time_change
 from 
  v$sql b, uow_sqlexec a

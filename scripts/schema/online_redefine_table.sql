@@ -1,4 +1,5 @@
 1. execute dbms_redefinition.can_redef_table('&schema','&table_name',dbms_redefinition.cons_use_pk);
+
 2. create interim table
     create table FB.form_submission_tmp(
          ID  NUMBER,
@@ -15,7 +16,9 @@
  3.
    begin 
     dbms_redefinition.start_redef_table('FB','FORM_SUBMISSION','FORM_SUBMISSION_TMP',
-               'id id, to_number(form) form, user_name user_name,submission_date submission_date, ' ||
+               'id id, 
+                to_number(form) form, 
+                user_name user_name,submission_date submission_date, ' ||
                'completed completed, submission_token submission_token,warwick_id warwick_id,' ||
                'usercode usercode,deleted_date deleted_date,user_email user_email',
                dbms_redefinition.cons_use_pk);
@@ -32,10 +35,14 @@
            DBMS_REDEFINITION.CONS_ORIG_PARAMS, TRUE, TRUE, TRUE, TRUE, num_errors);
      END;
      copy index,trigger,constraints,privilege and ignore errirs
+     
  5. select object_name, base_table_name, ddl_txt from DBA_REDEFINITION_ERRORS ;
+ 
  6 optional,  
     execute DBMS_REDEFINITION.SYNC_INTERIM_TABLE('FB', 'FORM_SUBMISSION', 'FORM_SUBMISSION_TMP');
+    
  7    execute     DBMS_REDEFINITION.FINISH_REDEF_TABLE('FB', 'FORM_SUBMISSION', 'FORM_SUBMISSION_TMP');
+ 
  8 drop the interim table
  
  
