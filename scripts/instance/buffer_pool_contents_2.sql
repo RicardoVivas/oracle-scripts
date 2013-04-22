@@ -65,7 +65,7 @@ from
         v$buffer_pool          bp
 where
         ob.dataobj# = bh.obj
-and     ob.owner# > 0
+--and     ob.owner# > 0
 and     bh.set_ds = ws.addr
 and     ws.set_id between bp.lo_setid and bp.hi_setid
 and     bp.buffers != 0        --  Eliminate any pools not in use

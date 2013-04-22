@@ -9,7 +9,8 @@
 select a.value, s.username, s.sid, s.serial#
 from v$sesstat a, v$statname b, v$session s
 where a.statistic# = b.statistic#  and s.sid=a.sid
-and b.name = 'opened cursors current';
+and b.name = 'opened cursors current'
+order by 1;
 
 --If you're running several N-tiered applications with multiple webservers, you may find it useful to monitor open cursors by username and machine:
 
@@ -21,4 +22,3 @@ where a.statistic# = b.statistic#  and s.sid=a.sid
 and b.name = 'opened cursors current' 
 group by s.username, s.machine
 order by 1 desc;
-``

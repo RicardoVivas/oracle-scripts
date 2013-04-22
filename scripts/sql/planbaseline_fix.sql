@@ -1,3 +1,4 @@
+-- Use planbaseline_display_from_sqlid to get the plan name
 DECLARE
   plan_loaded  PLS_INTEGER;
 BEGIN

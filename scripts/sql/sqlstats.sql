@@ -1,0 +1,1 @@
+select sysdate, last_active_time,disk_reads, buffer_gets,rows_processed, executions,elapsed_time, sql_text from v$sqlstats where sql_id='0k8522rmdzg4k'

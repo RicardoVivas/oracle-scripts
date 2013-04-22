@@ -1,3 +1,5 @@
 switchover
 redo
 initialization
+failover
+flashback
