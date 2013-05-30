@@ -51,3 +51,23 @@ select * from dba_autotask_client
 
 dbms_auto_task_admin
 dbms_auto_task_immediate
+
+
+To disable individual:
+
+BEGIN
+dbms_auto_task_admin.disable(client_name => 'sql tuning advisor', operation => NULL, window_name => 'THURSDAY_WINDOW');
+dbms_auto_task_admin.disable(client_name => 'sql tuning advisor', operation => NULL, window_name => 'FRIDAY_WINDOW');
+END;
+
+To disable in all windows:
+
+BEGIN
+dbms_auto_task_admin.disable(client_name => 'sql tuning advisor', operation => NULL, window_name => NULL);
+dbms_auto_task_admin.disable(client_name => 'auto space advisor', operation => NULL, window_name => NULL);
+dbms_auto_task_admin.disable(client_name => 'auto optimizer stats collection', operation => NULL, window_name => NULL);
+END;
+
+BEGIN
+dbms_auto_task_admin.disable();
+END;
