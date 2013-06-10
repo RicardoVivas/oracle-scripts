@@ -3,3 +3,6 @@ redo
 initialization
 failover
 flashback
+cfg
+rac
+zonecfg

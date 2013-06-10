@@ -8,4 +8,5 @@ a.session_state,  a.blocking_session, substr(a.SQL_OPNAME,1,8) sql_opame, substr
 from 
 v$active_session_history a, dba_users b  
 where a.user_id = b.user_id and b.username not in ( 'DBSNMP') and a.sample_time > sysdate - 0.125/24 
-order by a.sample_time desc ;
+--and sql_plan_hash_value = '186864253'
+order by a.sample_time ;

@@ -1,4 +1,4 @@
-# List all undocumented parameters
+# List all undocumented parameters; Run as sysdba
 
 COLUMN parameter           FORMAT a37
 COLUMN description         FORMAT a30 WORD_WRAPPED
