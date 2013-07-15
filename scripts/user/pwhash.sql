@@ -1,0 +1,1 @@
+select username , REGEXP_SUBSTR(DBMS_METADATA.get_ddl('USER',USERNAME), '''[^'']+''') from dba_users;

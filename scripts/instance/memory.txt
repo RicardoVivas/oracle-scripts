@@ -7,3 +7,17 @@ group by o.object_type,  o.object_name,b.objd, b.status ;
 
 select o.OBJECT_TYPE, o.OBJECT_NAME, o.owner,  b.status from v$bh b, dba_objects o 
 where b.objd = o.data_object_id;
+
+
+
+1.Increase MEMORY_TARGET (also increase memory_max_target) with 25% this being a rule of thumb when getting ORA-4031 
+(increasing with 10% might not be so helpful since the added amount of memory is small for this percentage).
+
+2.Set a minimum value for shared_pool_size to 1536 MB. Officially we DO recommend setting default/explicit settings for the auto-tuned components in the SGA.
+
+After database was up and running for a while, review data in V$MEMORY_DYNAMIC_COMPONENTS and manually assign values to the and db_cache_size at 70 or 75% of the current_size.
+
+4.The recommendation with ASMM/AMM is set the parameter _shared_pool_reserved_pct instead of the parameter shared_pool_reserved_size. Set the shared pool reserved percent with:
+alter system set "_shared_pool_reserved_pct"=10 scope=spfile;
+
+and restart the instance.

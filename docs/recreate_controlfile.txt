@@ -30,8 +30,7 @@ Recreating Control File:
 
 You can recreate the control file as long as you can generate the proper CREATE CONTROLFILE statement. 
 If you know your datafile and logfile layout then you can generate this statement even with no backup of anything. 
-The best way to re-create control file is with backup to trace. Continued..
-
+The best way to re-create control file is with backup to trace.
 
 
 First of all we will start the instance. No control file will be mounted at this stage. 
