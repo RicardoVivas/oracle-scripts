@@ -1,6 +1,6 @@
 Oracle provide two scripts to produce workload repository reports (awrrpt.sql and awrrpti.sql). 
-They are similar in format to the statspack reports and give the option of HTML or plain text formats. T
-he two reports give essential the same output but the awrrpti.sql allows you to select a single instance. 
+They are similar in format to the statspack reports and give the option of HTML or plain text formats. 
+The two reports give essential the same output but the awrrpti.sql allows you to select a single instance. 
 
 @$ORACLE_HOME/rdbms/admin/awrrpt.sql
 @$ORACLE_HOME/rdbms/admin/awrrpti.sql

@@ -3,7 +3,6 @@ select b.spid, a.sid, a.serial#, a.username,  a.event, a.program from v$session 
 
 --To kill session, run : alter system kill session 'sid, serial#' immediate
 
--- To find out which SQL, check showsql.sql
 select
 (select username from v$session where sid=a.sid) blocker,
 a.sid,

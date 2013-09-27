@@ -1,4 +1,5 @@
 cd  ~/code/PROD_puppet
+git fetch origin
 git checkout master
 git pull
 git checkout production
