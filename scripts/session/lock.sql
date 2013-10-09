@@ -1,16 +1,4 @@
 CLEAR SCREEN
-set linesize 150;
-set head on;
-col sid_serial form a13
-col ora_user for a15;
-col object_name for a25;
-col lock_mode for a15;
-col last_ddl for a20;
-col status for a10;
-break on sid_serial;
-set echo off
-set verify off
-
 
 SELECT l.session_id||','||v.serial# sid_serial,
        l.ORACLE_USERNAME ora_user,
