@@ -1,0 +1,45 @@
+
+declare
+ src_file BFILE;
+ dst_file BLOB;
+ 
+begin
+ src_file := bfilename('ORACLE_OCM_CONFIG_DIR', 'mandela.jpg');
+  -- insert a NULL record to lock
+INSERT INTO bigdata  (id, diary,image)  VALUES (2 , empty_clob(),EMPTY_BLOB())  RETURNING image INTO dst_file;
+  
+  -- lock record
+-- SELECT photo  INTO dst_file  FROM bigdata  WHERE id = 2 FOR UPDATE;
+  
+dbms_lob.fileopen(src_file, dbms_lob.file_readonly);
+dbms_lob.loadfromfile(dst_file, src_file, dbms_lob.getlength(src_file));
+  
+-- UPDATE bigdata  SET image = dst_file  WHERE id = 2 ;
+dbms_lob.fileclose(src_file); 
+end;
+/
+
+
+
+
+
+
+CREATE TABLE lob_table (id NUMBER, doc BLOB);
+INSERT INTO lob_table VALUES (1, EMPTY_BLOB()); 
+
+DECLARE
+  src_lob  BFILE := BFILENAME('MY_DIR', '/tmp/me.gif');
+  dest_lob BLOB;
+BEGIN
+  INSERT INTO lob_table VALUES(2, EMPTY_BLOB())
+     RETURNING doc INTO dest_lob;
+
+  DBMS_LOB.OPEN(src_lob, DBMS_LOB.LOB_READONLY);
+  DBMS_LOB.LoadFromFile( DEST_LOB => dest_lob,
+                         SRC_LOB  => src_lob,
+                         AMOUNT   => DBMS_LOB.GETLENGTH(src_lob) );
+  DBMS_LOB.CLOSE(src_lob);
+
+  COMMIT;
+END;
+/

@@ -1,3 +1,5 @@
+set verify off
+
 set serveroutput on
 
 declare 
@@ -47,7 +49,7 @@ begin
          || to_char( (elapsed_time - elapsed_time_pre)/(exec_num - exec_num_pre)/1000,'9,999.9') || '  '
          || to_char( (cpu_time - cpu_time_pre)/(exec_num - exec_num_pre)/1000,'9999.9') || '  '
          || to_char( (io_wait - io_wait_pre)/(exec_num - exec_num_pre)/1000,'9999.9') || '     '
-         || to_char( (phy_reads_bytes - phy_reads_bytes_pre)/(exec_num - exec_num_pre),'9,999') || '  '
+         || to_char( (phy_reads_bytes - phy_reads_bytes_pre)/(exec_num - exec_num_pre),'999,999') || '  '
          || to_char( (phy_writes_bytes - phy_writes_bytes_pre)/(exec_num - exec_num_pre),'9,999') || '  '
          || to_char( (disk_reads - disk_reads_pre)/(exec_num - exec_num_pre),'9999.9')  || '  '
          || to_char( (rows_processed - rows_processed_pre)/(exec_num - exec_num_pre),'9,999.9');

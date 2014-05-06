@@ -9,9 +9,8 @@ PKI-based encryption does not work with TDE tablespace encryption and hardware s
 
 
 To set or reset the master encryption key, use the following command:
-
-SQL> ALTER SYSTEM SET ENCRYPTION KEY ["certificate_ID"] IDENTIFIED BY "password"   // password is case sensitive. Enclose the password string in double quotation marks (" ").
-
+// password is case sensitive. Enclose the password string in double quotation marks (" ").
+SQL> ALTER SYSTEM SET ENCRYPTION KEY ["certificate_ID"] IDENTIFIED BY "password"   
 
 Open/Close Master Key 
 SQL> ALTER SYSTEM SET ENCRYPTION WALLET OPEN IDENTIFIED BY "password"
@@ -24,8 +23,10 @@ DBA_ENCRYPTED_COLUMNS
 V$WALLET
 DBA_TABLESPACES: The ENCRYPTED column indicates whether a tablespace is encrypted
 
-The security administrator also needs to open the wallet before performing database recovery operations. This is because background processes may require access to encrypted redo and undo logs.
-When performing database recovery, the wallet must be opened before opening the database. This is illustrated in the following statements:
+The security administrator also needs to open the wallet before performing database recovery operations. 
+This is because background processes may require access to encrypted redo and undo logs.
+When performing database recovery, the wallet must be opened before opening the database. 
+This is illustrated in the following statements:
 
 SQL> STARTUP MOUNT;
 SQL> ALTER SYSTEM SET ENCRYPTION WALLET OPEN IDENTIFIED BY "password";
@@ -65,7 +66,7 @@ You should not remove the PKCS#12 wallet (ewallet.p12 file) after the auto login
 You need the PKCS#12 wallet to regenerate/rekey the master encryption key in future.
 TDE uses an auto login wallet only if it is available at the correct location (ENCRYPTION_WALLET_LOCATION, WALLET_LOCATION, or default wallet location),
  and the SQL command to open an encrypted wallet has not already been executed. 
- If an auto login wallet is being used, you must not use the ALTER SYSTEM SET ENCRYPTION WALLET OPEN IDENTIFIED BY "password" command.
+If an auto login wallet is being used, you must not use the ALTER SYSTEM SET ENCRYPTION WALLET OPEN IDENTIFIED BY "password" command.
 Note: no harm done if you run the command
 
  [ID 988022.1] solved in 11.2.0.2
