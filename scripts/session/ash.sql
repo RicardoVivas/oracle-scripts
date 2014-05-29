@@ -8,5 +8,5 @@ substr(a.event,1,40) event,  a.session_id,
 a.sql_id,  a.sql_plan_hash_value,  a.session_type,  a.program, a.client_id
 from 
 v$active_session_history a, dba_users b  
-where a.user_id = b.user_id and b.username not in ( 'DBSNMP') and a.sample_time > sysdate - 1/12/24 
+where a.user_id = b.user_id and b.username not in ( 'DBSNMP') and a.sample_time > sysdate - 1/6/24 
 order by a.sample_time desc,a.sql_id,a.session_id ;

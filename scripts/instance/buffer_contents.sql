@@ -1,5 +1,5 @@
 set echo off
-clear screen
+--clear screen
 
  -- The following query assumes the block size is 8K
 select

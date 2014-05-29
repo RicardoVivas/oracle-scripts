@@ -1,0 +1,36 @@
+create user  ggs identified by ggs;
+grant create session to ggs;
+grant dba to ggs;
+grant select any dictionary to ggs;
+grant select any table to ggs;
+grant create table to ggs;
+grant flashback any table to ggs;
+grant execute on dbms_flashback to ggs;
+grant execute on utl_file to ggs;
+create tablespace gg datafile '/oradb/data/oem/gg01.dbf'  size 100m autoextend on;
+alter user ggs default tablespace gg;
+alter user ggs quota unlimited on gg;
+
+create user  ggt identified by ggt;
+grant create session to ggt;
+grant dba to ggt;
+grant select any dictionary to ggt;
+grant select any table to ggt;
+grant create table to ggt;
+grant flashback any table to ggt;
+grant execute on dbms_flashback to ggt;
+grant execute on utl_file to ggt;
+
+create tablespace gg datafile '/u01/app/oracle/oradata/orcl/gg01.dbf' size 100m autoextend on;
+alter user ggt default tablespace gg;
+alter user ggt quota unlimited on gg;
+
+
+
+-- Support Sequence --
+@/app/gg/sequence.sql
+alter table sys.seq$ add supplemental log data (primary key) columns;
+
+
+edit params ./GLOBALS
+GGSCHEMA ggs
