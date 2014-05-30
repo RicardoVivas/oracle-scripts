@@ -4,6 +4,7 @@ create table cartesian1 (id number , name varchar2(10));
 drop table cartesian2 purge;
 create table cartesian2 (id number , name varchar2(10));
 
+-- test
 insert into cartesian1 values (1, 'c1_1');
 insert into cartesian1 values (2, 'c1_2');
 
