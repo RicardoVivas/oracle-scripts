@@ -1,0 +1,111 @@
+      * This file is installed in the following path when you install
+      * the database: $ORACLE_HOME/rdbms/demo/lobs/procob/lwrite.pco
+
+     * WRITING DATA TO A LOB
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. WRITE-CLOB.
+       ENVIRONMENT DIVISION.
+       INPUT-OUTPUT SECTION.
+       FILE-CONTROL.
+          SELECT INFILE
+             ASSIGN TO "datfile.dat"
+             ORGANIZATION IS SEQUENTIAL.
+       DATA DIVISION.
+       FILE SECTION.
+ 
+       FD INFILE
+          RECORD CONTAINS 5 CHARACTERS.
+       01 INREC      PIC X(5).
+
+       WORKING-STORAGE SECTION.
+       01  CLOB1          SQL-CLOB.
+       01  BUFFER         PIC X(5) VARYING.
+       01  AMT            PIC S9(9) COMP VALUES 321.
+       01  OFFSET         PIC S9(9) COMP VALUE 1.
+       01  END-OF-FILE    PIC X(1) VALUES "N".
+       01  D-BUFFER-LEN   PIC 9.
+       01  D-AMT          PIC 9.
+       01  USERID   PIC X(11) VALUES "SAMP/SAMP".
+     
+           EXEC SQL INCLUDE SQLCA END-EXEC.
+
+       PROCEDURE DIVISION.
+       WRITE-CLOB.
+           EXEC SQL WHENEVER SQLERROR GOTO SQL-ERROR END-EXEC.
+           EXEC SQL
+                CONNECT :USERID
+           END-EXEC.
+
+      * Open the input file: 
+           OPEN INPUT INFILE.
+      * Allocate and initialize the CLOB locator: 
+           EXEC SQL ALLOCATE :CLOB1 END-EXEC.
+           EXEC SQL 
+                SELECT AD_SOURCETEXT INTO :CLOB1 FROM PRINT_MEDIA
+                WHERE PRODUCT_ID = 3106 AND AD_ID = 13001 FOR UPDATE
+           END-EXEC.
+
+      * Either write entire record or write first piece 
+      * Read a data file here and populate BUFFER-ARR and BUFFER-LEN
+      * END-OF-FILE will be set to "Y" when the entire file has been
+      * read.
+           PERFORM READ-NEXT-RECORD.
+           MOVE INREC TO BUFFER-ARR.
+           MOVE 5 TO BUFFER-LEN.
+           IF (END-OF-FILE = "Y")
+              EXEC SQL 
+                   LOB WRITE ONE :AMT FROM :BUFFER
+                   INTO :CLOB1 AT :OFFSET 
+              END-EXEC
+           ELSE
+              DISPLAY "LOB WRITE FIRST: ", BUFFER-ARR
+              EXEC SQL 
+                 LOB WRITE FIRST :AMT FROM :BUFFER 
+                 INTO :CLOB1 AT :OFFSET
+              END-EXEC.
+
+      * Continue reading from the input data file
+      * and writing to the CLOB: 
+           PERFORM READ-NEXT-RECORD.
+           PERFORM WRITE-TO-CLOB
+              UNTIL END-OF-FILE = "Y".
+           MOVE INREC TO BUFFER-ARR.
+           MOVE 1 TO BUFFER-LEN.
+           DISPLAY "LOB WRITE LAST: ", BUFFER-ARR(1:BUFFER-LEN).
+           EXEC SQL 
+                LOB WRITE LAST :AMT FROM :BUFFER INTO :CLOB1 
+           END-EXEC.
+           EXEC SQL
+                ROLLBACK WORK RELEASE
+           END-EXEC.
+           STOP RUN.
+
+         WRITE-TO-CLOB.
+           IF ( END-OF-FILE = "N")
+              MOVE INREC TO BUFFER-ARR.
+              MOVE 5 TO BUFFER-LEN.
+              DISPLAY "LOB WRITE NEXT: ", BUFFER-ARR(1:BUFFER-LEN).
+              EXEC SQL 
+                  LOB WRITE NEXT :AMT FROM :BUFFER INTO :CLOB1
+              END-EXEC.
+              PERFORM READ-NEXT-RECORD.
+
+        READ-NEXT-RECORD.
+           MOVE SPACES TO INREC.
+           READ INFILE NEXT RECORD
+                AT END
+                 MOVE "Y" TO END-OF-FILE.
+           DISPLAY "END-OF-FILE IS " END-OF-FILE.
+
+       SQL-ERROR.
+           EXEC SQL
+               WHENEVER SQLERROR CONTINUE
+           END-EXEC.
+           DISPLAY " ".
+           DISPLAY "ORACLE ERROR DETECTED:".
+           DISPLAY " ".
+           DISPLAY SQLERRMC.
+           EXEC SQL
+               ROLLBACK WORK RELEASE
+           END-EXEC.
+           STOP RUN.

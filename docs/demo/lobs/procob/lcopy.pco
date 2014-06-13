@@ -1,0 +1,93 @@
+      * This file is installed in the following path when you install
+      * the database: $ORACLE_HOME/rdbms/demo/lobs/procob/lcopy.pco
+
+     * COPYING ALL OR PART OF A LOB TO ANOTHER LOB
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. BLOB-COPY.
+       ENVIRONMENT DIVISION.
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+
+       01  USERID   PIC X(11) VALUES "SAMP/SAMP".
+       01  DEST           SQL-BLOB.
+       01  SRC            SQL-BLOB.
+     
+      * Define the amount to copy.
+      * This value has been chosen arbitrarily: 
+       01  AMT            PIC S9(9) COMP VALUE 10.
+      * Define the source and destination position.
+      * These values have been chosen arbitrarily: 
+       01  SRC-POS        PIC S9(9) COMP VALUE 1.
+       01  DEST-POS       PIC S9(9) COMP VALUE 1.
+
+      * The return value from PL/SQL function: 
+       01  RET            PIC S9(9) COMP.
+           EXEC SQL INCLUDE SQLCA END-EXEC.
+       PROCEDURE DIVISION.
+       COPY-BLOB.
+           EXEC SQL WHENEVER SQLERROR DO PERFORM SQL-ERROR END-EXEC.
+           EXEC SQL
+                CONNECT :USERID
+           END-EXEC.
+
+      * Allocate and initialize the BLOB locators: 
+           EXEC SQL ALLOCATE :DEST END-EXEC.
+           EXEC SQL ALLOCATE :SRC END-EXEC.
+           DISPLAY "Source and destination LOBs are open.".
+
+           EXEC SQL WHENEVER NOT FOUND GOTO END-OF-BLOB END-EXEC.
+           EXEC SQL 
+                SELECT AD_PHOTO INTO :SRC
+                FROM PRINT_MEDIA PM 
+                WHERE PM.PRODUCT_ID = 3106 AND AD_ID = 13001 END-EXEC.
+           DISPLAY "Source LOB populated.".
+           EXEC SQL
+                SELECT AD_PHOTO INTO :DEST
+                FROM PRINT_MEDIA PM 
+                WHERE PM.PRODUCT_ID = 3060 AND AD_ID = 11001 FOR UPDATE 
+END-EXEC.
+           DISPLAY "Destination LOB populated.".
+ 
+      * Open the DESTination LOB read/write and SRC LOB read only
+           EXEC SQL LOB OPEN :DEST READ WRITE END-EXEC.
+           EXEC SQL LOB OPEN :SRC READ ONLY END-EXEC.
+           DISPLAY "Source and destination LOBs are open.".
+
+      * Copy the desired amount
+           EXEC SQL 
+                LOB COPY :AMT FROM :SRC AT :SRC-POS
+                TO :DEST AT :DEST-POS END-EXEC.
+           DISPLAY "Src LOB copied to destination LOB.".
+
+      * Execute PL/SQL to get COMPARE functionality
+      * to make sure that the BLOBs are identical
+           EXEC SQL EXECUTE
+             BEGIN
+               :RET := DBMS_LOB.COMPARE(:SRC,:DEST,:AMT,1,1); END; END-EXEC.
+
+           IF RET = 0
+      *        Logic for equal BLOBs goes here
+               DISPLAY "BLOBs are equal"
+           ELSE
+      *        Logic for unequal BLOBs goes here
+               DISPLAY "BLOBs are not equal"
+           END-IF.
+
+           EXEC SQL LOB CLOSE :DEST END-EXEC.
+           EXEC SQL LOB CLOSE :SRC END-EXEC.
+
+       END-OF-BLOB.
+           EXEC SQL WHENEVER NOT FOUND CONTINUE END-EXEC.
+           EXEC SQL FREE :DEST END-EXEC.
+           EXEC SQL FREE :SRC END-EXEC.
+           EXEC SQL ROLLBACK WORK RELEASE END-EXEC.
+           STOP RUN.
+
+       SQL-ERROR.
+           EXEC SQL WHENEVER SQLERROR CONTINUE END-EXEC.
+           DISPLAY " ".
+           DISPLAY "ORACLE ERROR DETECTED:".
+           DISPLAY " ".
+           DISPLAY SQLERRMC.
+           EXEC SQL ROLLBACK WORK RELEASE END-EXEC.
+           STOP RUN.

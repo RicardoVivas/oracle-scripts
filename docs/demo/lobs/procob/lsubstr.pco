@@ -1,0 +1,60 @@
+      * This file is installed in the following path when you install
+      * the database: $ORACLE_HOME/rdbms/demo/lobs/procob/lsubstr.pco
+
+     * READING PORTION OF THE LOB DATA USING SUBSTR
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. BLOB-SUBSTR.
+       ENVIRONMENT DIVISION.
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+
+       01  BLOB1          SQL-BLOB.
+       01  BUFFER2        PIC X(32767) VARYING.
+       01  AMT            PIC S9(9) COMP.
+       01  POS            PIC S9(9) COMP VALUE 1.
+       01  USERID   PIC X(11) VALUES "SAMP/SAMP".
+           EXEC SQL INCLUDE SQLCA END-EXEC.
+           EXEC SQL VAR BUFFER2 IS VARRAW(32767) END-EXEC.
+
+       PROCEDURE DIVISION.
+       BLOB-SUBSTR.
+           EXEC SQL WHENEVER SQLERROR DO PERFORM SQL-ERROR END-EXEC.
+           EXEC SQL
+              CONNECT :USERID
+           END-EXEC.
+
+      * Allocate and initialize the CLOB locator: 
+           EXEC SQL ALLOCATE :BLOB1 END-EXEC.
+ 
+           EXEC SQL WHENEVER NOT FOUND GOTO END-OF-BLOB END-EXEC.
+             EXEC SQL 
+              SELECT AD_COMPOSITE INTO :BLOB1
+              FROM PRINT_MEDIA PM WHERE PM.PRODUCT_ID = 2268
+              AND AD_ID = 21001 END-EXEC.
+           DISPLAY "Selected the BLOB".
+
+      * Open the BLOB for READ ONLY: 
+           EXEC SQL LOB OPEN :BLOB1 READ ONLY END-EXEC.
+
+      * Execute PL/SQL to get SUBSTR functionality: 
+           MOVE 5 TO AMT.
+           EXEC SQL EXECUTE
+             BEGIN 
+               :BUFFER2 := DBMS_LOB.SUBSTR(:BLOB1,:AMT,:POS); END; END-EXEC.
+           EXEC SQL LOB CLOSE :BLOB1 END-EXEC.
+           DISPLAY "Substr: ", BUFFER2-ARR(POS:AMT).
+
+       END-OF-BLOB.
+           EXEC SQL WHENEVER NOT FOUND CONTINUE END-EXEC.
+           EXEC SQL FREE :BLOB1 END-EXEC. 
+           EXEC SQL ROLLBACK WORK RELEASE END-EXEC.
+           STOP RUN.
+
+       SQL-ERROR.
+           EXEC SQL WHENEVER SQLERROR CONTINUE END-EXEC.
+           DISPLAY " ".
+           DISPLAY "ORACLE ERROR DETECTED:".
+           DISPLAY " ".
+           DISPLAY SQLERRMC.
+           EXEC SQL ROLLBACK WORK RELEASE END-EXEC.
+           STOP RUN.

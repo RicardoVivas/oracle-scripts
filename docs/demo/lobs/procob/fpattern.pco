@@ -1,0 +1,72 @@
+      * This file is installed in the following path when you install
+      * the database: $ORACLE_HOME/rdbms/demo/lobs/procob/fpattern.pco
+
+     * Checking if a pattern exists in a BFILE using instr 
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. BFILE-INSTR.
+       ENVIRONMENT DIVISION.
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+
+       01  USERID   PIC X(11) VALUES "SAMP/SAMP".
+       01  BFILE1         SQL-BFILE.
+
+      * The length of pattern was chosen arbitrarily: 
+       01  PATTERN        PIC X(4) VALUE "2424".
+           EXEC SQL VAR PATTERN IS RAW(4) END-EXEC.
+       01  POS            PIC S9(9) COMP.
+       01  ORASLNRD       PIC 9(4).
+
+           EXEC SQL INCLUDE SQLCA END-EXEC.
+           EXEC ORACLE OPTION (ORACA=YES) END-EXEC.
+           EXEC SQL INCLUDE ORACA END-EXEC.        
+
+       PROCEDURE DIVISION.
+       BFILE-INSTR.
+
+           EXEC SQL WHENEVER SQLERROR DO PERFORM SQL-ERROR END-EXEC.
+           EXEC SQL CONNECT :USERID END-EXEC.
+
+      * Allocate and initialize the BFILE locator: 
+           EXEC SQL ALLOCATE :BFILE1 END-EXEC.
+
+           EXEC SQL WHENEVER NOT FOUND GOTO END-OF-BFILE END-EXEC.
+           EXEC SQL 
+                SELECT AD_GRAPHIC INTO :BFILE1
+                FROM PRINT_MEDIA WHERE PRODUCT_ID = 3106 AND AD_ID = 13001
+           END-EXEC.
+      
+      * Open the CLOB for READ ONLY: 
+           EXEC SQL LOB OPEN :BFILE1 READ ONLY END-EXEC.
+
+      * Execute PL/SQL to get INSTR functionality: 
+           EXEC SQL EXECUTE
+             BEGIN 
+               :POS := DBMS_LOB.INSTR(:BFILE1,:PATTERN, 1, 2); END; END-EXEC.
+           
+           IF POS = 0
+      *        Logic for pattern not found here
+               DISPLAY "Pattern is not found."
+           ELSE
+      *        Pos contains position where pattern is found
+               DISPLAY "Pattern is found."
+           END-IF.
+
+      * Close and free the LOB: 
+           EXEC SQL LOB CLOSE :BFILE1 END-EXEC.
+
+       END-OF-BFILE.
+           EXEC SQL WHENEVER NOT FOUND CONTINUE END-EXEC.
+           EXEC SQL FREE :BFILE1 END-EXEC.
+           EXEC SQL ROLLBACK WORK RELEASE END-EXEC.
+           STOP RUN.
+
+       SQL-ERROR.
+           EXEC SQL WHENEVER SQLERROR CONTINUE END-EXEC.
+           MOVE ORASLNR TO ORASLNRD.
+           DISPLAY " ".
+           DISPLAY "ORACLE ERROR DETECTED ON LINE ", ORASLNRD, ":".
+           DISPLAY " ".
+           DISPLAY SQLERRMC.
+           EXEC SQL ROLLBACK WORK RELEASE END-EXEC.
+           STOP RUN.

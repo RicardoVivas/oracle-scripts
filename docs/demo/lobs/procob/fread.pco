@@ -1,0 +1,47 @@
+      * This file is installed in the following path when you install
+      * the database: $ORACLE_HOME/rdbms/demo/lobs/procob/fread.pco
+
+     * Reading data from a BFILE. 
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. READ-BFILE.
+       ENVIRONMENT DIVISION.
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+       01  BFILE1         SQL-BFILE.
+       01  BUFFER2        PIC X(5) VARYING.
+       01  AMT            PIC S9(9) COMP.
+       01  OFFSET         PIC S9(9) COMP VALUE 1.
+         
+           EXEC SQL INCLUDE SQLCA END-EXEC.
+           EXEC SQL VAR BUFFER2 IS LONG RAW(5) END-EXEC.
+
+       PROCEDURE DIVISION.
+       READ-BFILE.
+
+      * Allocate and initialize the CLOB locator
+           EXEC SQL ALLOCATE :BFILE1 END-EXEC.
+           EXEC SQL WHENEVER NOT FOUND GOTO END-OF-BFILE END-EXEC.
+           EXEC SQL 
+                SELECT AD_GRAPHIC INTO :BFILE1
+                FROM PRINT_MEDIA M WHERE M.PRODUCT_ID = 3106 AND AD_ID = 13001
+           END-EXEC.
+      * Open the BFILE
+           EXEC SQL LOB OPEN :BFILE1 READ ONLY END-EXEC.
+ 
+      * Initiate polling read
+           MOVE 0 TO AMT.
+
+           EXEC SQL LOB READ :AMT FROM :BFILE1
+                INTO :BUFFER2 END-EXEC.
+      *
+      *     Display the data here.
+      * 
+  
+      * Close and free the locator
+           EXEC SQL WHENEVER NOT FOUND CONTINUE END-EXEC.
+           EXEC SQL LOB CLOSE :BFILE1 END-EXEC.
+
+       END-OF-BFILE.
+           EXEC SQL WHENEVER NOT FOUND CONTINUE END-EXEC.
+           EXEC SQL FREE :BFILE1 END-EXEC.
+           

@@ -1,0 +1,48 @@
+/* This file is installed in the following path when you install */
+/* the database: $ORACLE_HOME/rdbms/demo/lobs/proc/fisopen.pc */
+
+/* Checking if the BFILE is open with ISOPEN.
+   In Pro*C/C++, there is only one form of ISOPEN to determine whether
+   or not a BFILE is OPEN. There is no FILEISOPEN, only a simple ISOPEN.
+   This is an attribute used in the DESCRIBE statement: */
+
+#include <oci.h>
+#include <stdio.h>
+#include <sqlca.h>
+
+void Sample_Error()
+{
+  EXEC SQL WHENEVER SQLERROR CONTINUE;
+  printf("%.*s\n", sqlca.sqlerrm.sqlerrml, sqlca.sqlerrm.sqlerrmc);
+  EXEC SQL ROLLBACK WORK RELEASE;
+  exit(1);
+}
+
+void seeIfOpenBFILE_proc()
+{
+  OCIBFileLocator *Lob_loc;
+  int isOpen;
+
+  EXEC SQL WHENEVER SQLERROR DO Sample_Error();
+  EXEC SQL ALLOCATE :Lob_loc;
+  /* Select the BFILE into the locator: */
+  EXEC SQL SELECT ad_graphic INTO :Lob_loc FROM Print_media
+           WHERE product_id = 2056 AND ad_id = 12001;
+  /* Determine if the BFILE is OPEN or not: */
+  EXEC SQL LOB DESCRIBE :Lob_loc GET ISOPEN into :isOpen;
+  if (isOpen)
+    printf("BFILE is open\n");
+  else
+    printf("BFILE is not open\n");
+  /* Note that in this example, the BFILE is not open: */
+  EXEC SQL FREE :Lob_loc;
+}
+
+void main()
+{
+  char *samp = "samp/samp";
+  EXEC SQL CONNECT :samp;
+  seeIfOpenBFILE_proc();
+  EXEC SQL ROLLBACK WORK RELEASE;
+}
+

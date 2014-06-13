@@ -1,0 +1,75 @@
+      * This file is installed in the following path when you install
+      * the database: $ORACLE_HOME/rdbms/demo/lobs/procob/lcompare.pco
+
+      * COMPARING ALL OR PART OF TWO LOBS
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. COMPARE.
+       ENVIRONMENT DIVISION.
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+       01  USERID   PIC X(11) VALUES "SAMP/SAMP".
+       01  BLOB1          SQL-BLOB.
+       01  BLOB2          SQL-BLOB.
+       01  BUFFER2        PIC X(32767) VARYING.
+       01  RET            PIC S9(9) COMP.
+       01  AMT            PIC S9(9) COMP.
+       01  POS            PIC S9(9) COMP VALUE 1024.
+       01  OFFSET         PIC S9(9) COMP VALUE 1.
+
+           EXEC SQL VAR BUFFER2 IS VARRAW(32767) END-EXEC.
+           EXEC SQL INCLUDE SQLCA END-EXEC.
+
+       PROCEDURE DIVISION.
+       COMPARE-BLOB.
+           EXEC SQL WHENEVER SQLERROR DO PERFORM SQL-ERROR END-EXEC.
+           EXEC SQL
+                CONNECT :USERID
+           END-EXEC.
+      * Allocate and initialize the BLOB locators: 
+           EXEC SQL ALLOCATE :BLOB1 END-EXEC.
+           EXEC SQL ALLOCATE :BLOB2 END-EXEC.
+            EXEC SQL WHENEVER NOT FOUND GOTO END-OF-BLOB END-EXEC.
+             EXEC SQL 
+                SELECT AD_COMPOSITE INTO :BLOB1
+                FROM PRINT_MEDIA PM WHERE PM.PRODUCT_ID = 2268  AND AD_ID = 21001
+             END-EXEC.
+            EXEC SQL 
+                SELECT AD_COMPOSITE INTO :BLOB2
+                FROM PRINT_MEDIA PM WHERE PM.PRODUCT_ID = 3060 AND AD_ID = 11001
+                END-EXEC.
+   
+      * Open the BLOBs for READ ONLY: 
+           EXEC SQL LOB OPEN :BLOB1 READ ONLY END-EXEC.
+           EXEC SQL LOB OPEN :BLOB2 READ ONLY END-EXEC.
+
+      * Execute PL/SQL to get COMPARE functionality: 
+           MOVE 4 TO AMT.
+           EXEC SQL EXECUTE
+             BEGIN 
+               :RET := DBMS_LOB.COMPARE(:BLOB1,:BLOB2,:AMT,1,1); END; END-EXEC.
+           
+           IF RET = 0
+      *        Logic for equal BLOBs goes here
+               DISPLAY "BLOBs are equal"
+           ELSE
+      *        Logic for unequal BLOBs goes here
+               DISPLAY "BLOBs are not equal"
+           END-IF.
+           EXEC SQL LOB CLOSE :BLOB1 END-EXEC.
+           EXEC SQL LOB CLOSE :BLOB2 END-EXEC.
+
+       END-OF-BLOB.
+           EXEC SQL WHENEVER NOT FOUND CONTINUE END-EXEC.
+           EXEC SQL FREE :BLOB1 END-EXEC.
+           EXEC SQL FREE :BLOB2 END-EXEC.
+           EXEC SQL ROLLBACK WORK RELEASE END-EXEC.
+           STOP RUN.
+
+       SQL-ERROR.
+           EXEC SQL WHENEVER SQLERROR CONTINUE END-EXEC.
+           DISPLAY " ".
+           DISPLAY "ORACLE ERROR DETECTED:".
+           DISPLAY " ".
+           DISPLAY SQLERRMC.
+           EXEC SQL ROLLBACK WORK RELEASE END-EXEC.
+           STOP RUN.

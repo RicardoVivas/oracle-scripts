@@ -1,0 +1,54 @@
+PL/SQL Large Objects(LOBs) EXAMPLES 
+
+Note:
+These lob examples are available in /rdbms/demo/lobs/plsql 
+The example scripts, are taken from the "Oracle10i Application Developer's Guide -
+Large Objects (LOBs)". The majority of these examples 
+are based on the print_media table of the common schema. 
+
+Persistent and temporary LOB examples -- These examples have a prefix "l" for LOB
+DEMO NAME	DESCRIPTION
+lappend		appending one lob to another
+lcompare	comparing all or part of lob
+lcopy		copying all or part of a lob to another lob
+lcopyloc	copying a lob locator
+lcnvblob        convert a clob/nclob to a blob
+lcnvclob        convert a blob to a clob/nclob
+ldisplay	displaying lob data
+lerase		erasing part of a lob
+linsert		inserting a row by initializing lob locator bind variable
+linstr  	seeing if pattern exists in lob (instr)
+lisopen		seeing if lob is open
+listemp		seeing if lob is temporary
+llength		getting the length of a lob
+lloaddat	loading a lob with bfile data
+lread		reading data from lob
+lsubstr 	reading portion of lob (substr)
+ltrim		trimming lob data
+lwriteap	writing to the end of lob (write append)
+lwrite		writing data to a lob
+lldblobf        load blob from file
+lldclobf        load clob from file
+lldclobs        load clob from file
+
+Bfile Examples -- These examples have a prefix "f" for File
+fclosea		closing all open bfiles
+finsert		inserting a row containing by initializing a bfile locator
+ffilopen	opening a bfile with FILEOPEN
+fopen		opening a bfile with OPEN
+ffisopen	seeing if bfile is open with FILEISOPEN
+fisopen		seeing if bfile is open with ISOPEN
+fdisplay	displaying bfile data
+fread		reading data from a bfile
+freadprt	reading portion of bfile data (substr)
+fpattern	seeing if pattern exists (instr) in bfile
+fcompare	comparing all or part of two bfiles
+fexists		seeing if bfile exists
+flength		getting the length of a bfile
+fcopyloc	copying a lob locator for a bfile
+fgetdir		getting bfile directory alias and filename
+fupdate		updating a bfile by initializing bfile locator
+fclose_f	closing a bfile with FILECLOSE
+fclose_c	closing a bfile with CLOSE
+
+***********************

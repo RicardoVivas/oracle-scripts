@@ -1,0 +1,109 @@
+/* This file is installed in the following path when you install */
+/* the database: $ORACLE_HOME/rdbms/demo/lobs/proc/lwrite.pc */
+
+/* Writing data to a LOB */
+/* This example shows how you can use Pro*C/C++ to write
+   arbitrary amounts of data to an Internal LOB in either a single piece
+   of in multiple pieces using a Streaming Mechanism that utilizes standard
+   polling.  A dynamically allocated Buffer holds the data being
+   written to the LOB: */
+#include <oci.h>
+#include <stdio.h>
+#include <string.h>
+#include <sqlca.h>
+
+void Sample_Error()
+{
+  EXEC SQL WHENEVER SQLERROR CONTINUE;
+  printf("%.*s\n", sqlca.sqlerrm.sqlerrml, sqlca.sqlerrm.sqlerrmc);
+  EXEC SQL ROLLBACK WORK RELEASE;
+  exit(1);
+}
+
+#define BufferLength 1024
+
+void writeDataToLOB_proc(multiple) int multiple;
+{
+  OCIClobLocator *Lob_loc;
+  varchar Buffer[BufferLength];
+  unsigned int Total;
+  unsigned int Amount;
+  unsigned int remainder, nbytes;
+  boolean last;
+
+  EXEC SQL WHENEVER SQLERROR DO Sample_Error();
+  /* Allocate and Initialize the Locator: */
+  EXEC SQL ALLOCATE :Lob_loc;
+  EXEC SQL SELECT ad_sourcetext INTO Lob_loc
+           FROM Print_media WHERE product_id = 3060 AND ad_id = 11001 FOR UPDATE;
+  /* Open the CLOB: */
+  EXEC SQL LOB OPEN :Lob_loc READ WRITE;
+  Total = Amount = (multiple * BufferLength);
+  if (Total > BufferLength)
+    nbytes = BufferLength;   /* We will use streaming via standard polling */
+  else
+    nbytes = Total;                     /* Only a single write is required */
+  /* Fill the buffer with nbytes worth of data: */
+  memset((void *)Buffer.arr, 32, nbytes);
+  Buffer.len = nbytes;       /* Set the Length */
+  remainder = Total - nbytes;
+  if (0 == remainder)
+    {
+      /* Here, (Total <= BufferLength) so we can write in one piece: */
+      EXEC SQL LOB WRITE ONE :Amount FROM :Buffer INTO :Lob_loc;
+      printf("Write ONE Total of %d characters\n", Amount);
+    }
+  else
+    {
+      /* Here (Total > BufferLength) so we streaming via standard polling */
+      /* write the first piece.  Specifying first initiates polling: */
+      EXEC SQL LOB WRITE FIRST :Amount FROM :Buffer INTO :Lob_loc;
+      printf("Write first %d characters\n", Buffer.len);
+      last = FALSE;
+      /* Write the next (interim) and last pieces: */
+      do 
+        {
+          if (remainder > BufferLength)
+            nbytes = BufferLength;        /* Still have more pieces to go */
+          else
+            {
+              nbytes = remainder;    /* Here, (remainder <= BufferLength) */
+              last = TRUE;         /* This is going to be the Final piece */
+            }
+          /* Fill the buffer with nbytes worth of data: */
+          memset((void *)Buffer.arr, 32, nbytes);
+          Buffer.len = nbytes;       /* Set the Length */
+          if (last)
+            {
+              EXEC SQL WHENEVER SQLERROR DO Sample_Error();
+              /* Specifying LAST terminates polling: */
+              EXEC SQL LOB WRITE LAST :Amount FROM :Buffer INTO :Lob_loc;
+              printf("Write LAST Total of %d characters\n", Amount);
+            }
+          else
+            {
+              EXEC SQL WHENEVER SQLERROR DO break;
+              EXEC SQL LOB WRITE NEXT :Amount FROM :Buffer INTO :Lob_loc;
+              printf("Write NEXT %d characters\n", Buffer.len);
+            }
+          /* Determine how much is left to write: */
+          remainder = remainder - nbytes;
+        } while (!last);
+    }
+  EXEC SQL WHENEVER SQLERROR DO Sample_Error();
+  /* At this point, (Amount == Total), the total amount that was written */
+  /* Close the CLOB: */
+  EXEC SQL LOB CLOSE :Lob_loc;
+  /* Free resources held by the Locator: */
+  EXEC SQL FREE :Lob_loc;
+}
+
+void main()
+{
+  char *samp = "samp/samp";
+  EXEC SQL CONNECT :samp;
+  writeDataToLOB_proc(1);
+  EXEC SQL ROLLBACK WORK;
+  writeDataToLOB_proc(4);
+  EXEC SQL ROLLBACK WORK RELEASE;
+}

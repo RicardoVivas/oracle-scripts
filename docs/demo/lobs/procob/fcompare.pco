@@ -1,0 +1,93 @@
+      * This file is installed in the following path when you install
+      * the database: $ORACLE_HOME/rdbms/demo/lobs/procob/fcompare.pco
+
+     * Comparing all or parts of two BFILES. 
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. BFILE-COMPARE.
+       ENVIRONMENT DIVISION.
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+       01  USERID          PIC X(11) VALUES "SAMP/SAMP".
+       01  BFILE1          SQL-BFILE.
+       01  BFILE2          SQL-BFILE.
+       01  RET             PIC S9(9) COMP.
+       01  AMT             PIC S9(9) COMP.
+       01  DIR-ALIAS       PIC X(30) VARYING.
+       01  FNAME           PIC X(20) VARYING.
+       01  ORASLNRD        PIC 9(4).
+
+           EXEC SQL INCLUDE SQLCA END-EXEC.
+           EXEC ORACLE OPTION (ORACA=YES) END-EXEC.
+           EXEC SQL INCLUDE ORACA END-EXEC.
+
+       PROCEDURE DIVISION.
+       BFIlE-COMPARE.
+
+           EXEC SQL WHENEVER SQLERROR DO PERFORM SQL-ERROR END-EXEC.
+           EXEC SQL
+                CONNECT :USERID
+           END-EXEC.
+
+      * Allocate and initialize the BLOB locators: 
+           EXEC SQL ALLOCATE :BFILE1 END-EXEC.
+           EXEC SQL ALLOCATE :BFILE2 END-EXEC. 
+  
+      * Set up the directory and file information: 
+           MOVE "ADGRAPHIC_DIR" TO DIR-ALIAS-ARR.
+           MOVE 9 TO DIR-ALIAS-LEN.
+           MOVE "keyboard_graphic_3106_13001" TO FNAME-ARR.
+           MOVE 17 TO FNAME-LEN.
+ 
+           EXEC SQL
+              LOB FILE SET :BFILE1 DIRECTORY = :DIR-ALIAS,
+              FILENAME = :FNAME
+           END-EXEC.
+
+           EXEC SQL WHENEVER NOT FOUND GOTO END-OF-BFILE END-EXEC.
+           EXEC SQL 
+                SELECT AD_GRAPHIC INTO :BFILE2
+                FROM PRINT_MEDIA WHERE PRODUCT_ID = 3106 AND ad_id = 13001
+           END-EXEC.
+ 
+      * Open the BLOBs for READ ONLY: 
+           EXEC SQL LOB OPEN :BFILE1 READ ONLY END-EXEC.
+           EXEC SQL LOB OPEN :BFILE2 READ ONLY END-EXEC.
+
+      * Execute PL/SQL to get COMPARE functionality: 
+           MOVE 5 TO AMT.
+           EXEC SQL EXECUTE
+             BEGIN 
+               :RET := DBMS_LOB.COMPARE(:BFILE1,:BFILE2,
+                                        :AMT,1,1);
+             END;
+           END-EXEC.
+           
+           IF RET = 0
+      *        Logic for equal BFILEs goes here
+               DISPLAY "BFILES are equal"
+           ELSE
+      *        Logic for unequal BFILEs goes here
+               DISPLAY "BFILEs are not equal"
+           END-IF.
+
+           EXEC SQL LOB CLOSE :BFILE1 END-EXEC.
+           EXEC SQL LOB CLOSE :BFILE2 END-EXEC.
+       END-OF-BFILE.
+           EXEC SQL WHENEVER NOT FOUND CONTINUE END-EXEC.
+           EXEC SQL FREE :BFILE1 END-EXEC.
+           EXEC SQL FREE :BFILE2 END-EXEC.
+           STOP RUN.
+
+       SQL-ERROR.
+           EXEC SQL
+               WHENEVER SQLERROR CONTINUE
+           END-EXEC.
+           MOVE ORASLNR TO ORASLNRD.
+           DISPLAY " ".
+           DISPLAY "ORACLE ERROR DETECTED ON LINE ", ORASLNRD, ":".
+           DISPLAY " ".
+           DISPLAY SQLERRMC.
+           EXEC SQL
+               ROLLBACK WORK RELEASE
+           END-EXEC.
+           STOP RUN.

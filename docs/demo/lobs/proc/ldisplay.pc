@@ -1,0 +1,64 @@
+/* This file is installed in the following path when you install */
+/* the database: $ORACLE_HOME/rdbms/demo/lobs/proc/ldisplay.pc */
+
+/* Displaying LOB data. This example reads the entire contents of a BLOB 
+   piecewise into a buffer using a standard polling method, processing 
+   each buffer piece after every READ operation until the entire BLOB 
+   has been read: */
+
+#include <oci.h>
+#include <stdio.h>
+#include <sqlca.h>
+
+void Sample_Error()
+{
+  EXEC SQL WHENEVER SQLERROR CONTINUE;
+  printf("%.*s\n", sqlca.sqlerrm.sqlerrml, sqlca.sqlerrm.sqlerrmc);
+  EXEC SQL ROLLBACK WORK RELEASE;
+  exit(1);
+}
+
+#define BufferLength 32767
+
+void displayLOB_proc()
+{
+  OCIBlobLocator *Lob_loc;
+  int Amount;
+  struct {
+    unsigned short Length;
+    char Data[BufferLength];
+  } Buffer;
+  /* Datatype equivalencing is mandatory for this datatype: */
+  EXEC SQL VAR Buffer IS VARRAW(BufferLength);
+
+  EXEC SQL WHENEVER SQLERROR DO Sample_Error();
+  EXEC SQL ALLOCATE :Lob_loc;
+  /* Select the BLOB: */
+  EXEC SQL SELECT m.ad_header.header_text INTO Lob_loc
+           FROM Print_media m WHERE m.product_id = 3060 AND ad_id = 11001;
+  /* Open the BLOB: */
+  EXEC SQL LOB OPEN :Lob_loc READ ONLY;
+  /* Setting Amount = 0 will initiate the polling method: */
+  Amount = 0;
+  /* Set the maximum size of the Buffer: */
+  Buffer.Length = BufferLength;
+  EXEC SQL WHENEVER NOT FOUND DO break;
+  while (TRUE)
+    {
+      /* Read a piece of the BLOB into the Buffer: */
+      EXEC SQL LOB READ :Amount FROM :Lob_loc INTO :Buffer;
+      /* Process (Buffer.Length == BufferLength) amount of Buffer.Data */
+    }
+  /* Process (Buffer.Length == Amount) amount of Buffer.Data */
+  /* Closing the BLOB is mandatory if you have opened it: */
+  EXEC SQL LOB CLOSE :Lob_loc;
+  EXEC SQL FREE :Lob_loc;
+}
+
+void main()
+{
+  char *samp = "samp/samp";
+  EXEC SQL CONNECT :samp;
+  displayLOB_proc();
+  EXEC SQL ROLLBACK WORK RELEASE;  
+}

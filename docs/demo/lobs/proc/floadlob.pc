@@ -1,0 +1,58 @@
+/* This file is installed in the following path when you install */
+/* the database: $ORACLE_HOME/rdbms/demo/lobs/proc/floadlob.pc */
+
+/* Loading a LOB with BFILE data. */ 
+
+#include <oci.h>
+#include <stdio.h>
+#include <sqlca.h>
+
+void Sample_Error()
+{
+  EXEC SQL WHENEVER SQLERROR CONTINUE;
+  printf("%.*s\n", sqlca.sqlerrm.sqlerrml, sqlca.sqlerrm.sqlerrmc);
+  EXEC SQL ROLLBACK WORK RELEASE;
+  exit(1);
+}
+
+void loadLOBFromBFILE_proc()
+{
+  OCIBlobLocator *Dest_loc;
+  OCIBFileLocator *Src_loc;
+  char *Dir = "ADGRAPHIC_DIR", *Name = "mousepad_graphic_2056_12001";
+  int Amount = 4096;
+
+  EXEC SQL WHENEVER SQLERROR DO Sample_Error();
+
+  /* Initialize the BFILE Locator: */
+  EXEC SQL ALLOCATE :Src_loc;
+  EXEC SQL LOB FILE SET :Src_loc DIRECTORY = :Dir, FILENAME = :Name;
+
+  /* Initialize the BLOB Locator: */
+  EXEC SQL ALLOCATE :Dest_loc;
+  EXEC SQL SELECT ad_photo INTO :Dest_loc FROM Print_media
+           WHERE Product_ID = 2056 AND AD_ID = 12001 FOR UPDATE;
+
+  /* Opening the BFILE is Mandatory: */
+  EXEC SQL LOB OPEN :Src_loc READ ONLY;
+
+  /* Opening the BLOB is Optional: */
+  EXEC SQL LOB OPEN :Dest_loc READ WRITE;
+  EXEC SQL LOB LOAD :Amount FROM FILE :Src_loc INTO :Dest_loc;
+
+  /* Closing LOBs and BFILEs is Mandatory if they have been OPENed: */
+  EXEC SQL LOB CLOSE :Dest_loc;
+  EXEC SQL LOB CLOSE :Src_loc;
+
+  /* Release resources held by the Locators: */
+  EXEC SQL FREE :Dest_loc;
+  EXEC SQL FREE :Src_loc;
+}
+
+void main()
+{
+  char *samp = "samp/samp";
+  EXEC SQL CONNECT :samp;
+  loadLOBFromBFILE_proc();
+  EXEC SQL ROLLBACK WORK RELEASE;
+}

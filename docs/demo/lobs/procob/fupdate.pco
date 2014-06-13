@@ -1,0 +1,60 @@
+      * This file is installed in the following path when you install
+      * the database: $ORACLE_HOME/rdbms/demo/lobs/procob/fupdate.pco
+
+     * Updating a BFILE by initializing a BFILE locator.
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. BFILE-UPDATE.
+       ENVIRONMENT DIVISION.
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+
+       01  USERID         PIC X(11) VALUES "SAMP/SAMP".
+       01  BFILE1         SQL-BFILE.
+       01  BFILE-IND      PIC S9(4) COMP.
+       01  DIR-ALIAS      PIC X(30) VARYING.
+       01  FNAME          PIC X(30) VARYING.
+       01  ORASLNRD       PIC 9(4).
+
+           EXEC SQL INCLUDE SQLCA END-EXEC.
+           EXEC ORACLE OPTION (ORACA=YES) END-EXEC.
+           EXEC SQL INCLUDE ORACA END-EXEC.
+        
+       PROCEDURE DIVISION.
+       BFILE-UPDATE.
+
+           EXEC SQL WHENEVER SQLERROR DO PERFORM SQL-ERROR END-EXEC.
+           EXEC SQL CONNECT :USERID END-EXEC.
+
+      * Allocate and initialize the BFILE locator:
+           EXEC SQL ALLOCATE :BFILE1 END-EXEC.
+
+      * Populate the BFILE: 
+           EXEC SQL WHENEVER NOT FOUND GOTO END-OF-BFILE END-EXEC.
+           EXEC ORACLE OPTION (SELECT_ERROR=NO) END-EXEC.
+           EXEC SQL 
+                SELECT AD_GRAPHIC INTO :BFILE1:BFILE-IND
+                FROM PRINT_MEDIA WHERE PRODUCT_ID = 3060 
+                AND AD_ID = 13001 END-EXEC.
+
+      * Make graphic associated with product_id=3106 same as product_id=3060
+      * and ad_id = 13001: 
+           EXEC SQL 
+                UPDATE PRINT_MEDIA SET AD_GRAPHIC = :BFILE1:BFILE-IND
+                WHERE PRODUCT_ID = 3106 AND AD_ID = 13001 END-EXEC.
+        
+      * Free the BFILE: 
+       END-OF-BFILE.
+           EXEC SQL WHENEVER NOT FOUND CONTINUE END-EXEC.
+           EXEC SQL FREE :BFILE1 END-EXEC.
+           EXEC SQL ROLLBACK WORK RELEASE END-EXEC.
+           STOP RUN.
+
+       SQL-ERROR.
+           EXEC SQL WHENEVER SQLERROR CONTINUE END-EXEC.
+           MOVE ORASLNR TO ORASLNRD.
+           DISPLAY " ".
+           DISPLAY "ORACLE ERROR DETECTED ON LINE ", ORASLNRD, ":".
+           DISPLAY " ".
+           DISPLAY SQLERRMC.
+           EXEC SQL ROLLBACK WORK RELEASE END-EXEC.
+           STOP RUN.

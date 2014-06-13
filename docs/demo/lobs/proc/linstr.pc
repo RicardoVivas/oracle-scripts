@@ -1,0 +1,52 @@
+/* This file is installed in the following path when you install */
+/* the database: $ORACLE_HOME/rdbms/demo/lobs/proc/linstr.pc */
+
+/* Seeing if a pattern exists in the LOB using instr
+#include <oci.h>
+#include <stdio.h>
+#include <sqlca.h>
+
+void Sample_Error()
+{
+  EXEC SQL WHENEVER SQLERROR CONTINUE;
+  printf("%.*s\n", sqlca.sqlerrm.sqlerrml, sqlca.sqlerrm.sqlerrmc);
+  EXEC SQL ROLLBACK WORK RELEASE;
+  exit(1);
+}
+
+void instringLOB_proc()
+{
+  OCIClobLocator *Lob_loc;
+  char *Pattern = "The End";
+  int Position = 0;
+  int Offset = 1;
+  int Occurrence = 1;
+
+  EXEC SQL WHENEVER SQLERROR DO Sample_Error();
+  EXEC SQL ALLOCATE :Lob_loc;
+  EXEC SQL SELECT ad_sourcetext INTO :Lob_loc
+           FROM Print_media WHERE product_id = 3060 AND ad_id = 11001;
+  /* Opening the LOB is Optional: */
+  EXEC SQL LOB OPEN :Lob_loc;
+  /* Seek the Pattern using DBMS_LOB.INSTR() in a PL/SQL block: */
+  EXEC SQL EXECUTE
+    BEGIN
+      :Position := DBMS_LOB.INSTR(:Lob_loc, :Pattern, :Offset, :Occurrence);
+    END;
+  END-EXEC;
+  if (0 == Position)
+    printf("Pattern not found\n");
+  else
+    printf("The pattern occurs at %d\n", Position);
+  /* Closing the LOB is mandatory if you have opened it: */
+  EXEC SQL LOB CLOSE :Lob_loc;
+  EXEC SQL FREE :Lob_loc;
+}
+
+void main()
+{
+  char *samp = "pm/pm";
+  EXEC SQL CONNECT :pm;
+  instringLOB_proc();
+  EXEC SQL ROLLBACK WORK RELEASE;
+}

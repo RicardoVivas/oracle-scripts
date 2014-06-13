@@ -1,0 +1,84 @@
+      * This file is installed in the following path when you install
+      * the database: $ORACLE_HOME/rdbms/demo/lobs/procob/fdisplay.pco
+
+     * Displaying BFILE data. 
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID.  DISPLAY-BFILE.
+       ENVIRONMENT DIVISION.
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+
+       01  USERID         PIC X(9) VALUES "SAMP/SAMP".
+           EXEC SQL BEGIN DECLARE SECTION END-EXEC.
+       01  DEST-BLOB      SQL-BLOB.
+       01  SRC-BFILE      SQL-BFILE.
+       01  BUFFER         PIC X(5) VARYING.
+       01  OFFSET	  PIC S9(9) COMP VALUE 1.
+       01  AMT            PIC S9(9) COMP.
+       01  ORASLNRD       PIC  9(4).
+           EXEC SQL END DECLARE SECTION END-EXEC.
+       01  D-AMT		PIC 99,999,99.
+           EXEC SQL VAR BUFFER IS LONG RAW (100) END-EXEC.
+           EXEC SQL INCLUDE SQLCA END-EXEC.
+           EXEC ORACLE OPTION (ORACA=YES) END-EXEC.
+           EXEC SQL INCLUDE ORACA END-EXEC.
+
+       PROCEDURE DIVISION.
+       DISPLAY-BFILE-DATA.
+
+      * Connect to ORACLE
+           EXEC SQL WHENEVER SQLERROR DO PERFORM SQL-ERROR END-EXEC.
+           EXEC SQL
+                CONNECT :USERID
+           END-EXEC.
+
+      * Allocate and initialize the BFILE locator
+           EXEC SQL ALLOCATE :SRC-BFILE END-EXEC.
+
+      * Select the BFILE
+           EXEC SQL SELECT AD_GRAPHIC INTO :SRC-BFILE
+              FROM PRINT_MEDIA WHERE PRODUCT_ID = 3106 AND AD_ID = 13001 
+           END-EXEC.
+           
+      * Open the BFILE
+           EXEC SQL LOB OPEN :SRC-BFILE READ ONLY END-EXEC.
+      
+      * Set the amount = 0 will initiate the polling method
+           MOVE 0 TO AMT;
+           EXEC SQL LOB READ :AMT FROM :SRC-BFILE INTO :BUFFER END-EXEC.
+
+      *    DISPLAY "BFILE DATA".
+      *    MOVE AMT TO D-AMT.
+      *    DISPLAY "First READ (", D-AMT, "): " BUFFER.
+
+      * Do READ-LOOP until the whole BFILE is read.
+           EXEC SQL WHENEVER NOT FOUND GO TO END-LOOP END-EXEC.
+            
+       READ-LOOP.
+           EXEC SQL LOB READ :AMT FROM :SRC-BFILE INTO :BUFFER END-EXEC.
+
+      *    MOVE AMT TO D-AMT.
+      *    DISPLAY "Next READ (", D-AMT, "): " BUFFER.
+
+           GO TO READ-LOOP.
+
+       END-LOOP.
+           EXEC SQL WHENEVER NOT FOUND CONTINUE END-EXEC.
+
+      * Close the LOB
+           EXEC SQL LOB CLOSE :SRC-BFILE END-EXEC.
+
+      * And free the LOB locator
+           EXEC SQL FREE :SRC-BFILE END-EXEC.
+           EXEC SQL ROLLBACK RELEASE END-EXEC.
+           STOP RUN.
+
+       SQL-ERROR.
+           EXEC SQL WHENEVER SQLERROR CONTINUE END-EXEC.
+           MOVE ORASLNR TO ORASLNRD.
+           DISPLAY " ".
+           DISPLAY "ORACLE ERROR DETECTED ON LINE ", ORASLNRD, ":".
+           DISPLAY " ".
+           DISPLAY SQLERRMC.
+           EXEC SQL ROLLBACK WORK RELEASE END-EXEC.
+           STOP RUN.

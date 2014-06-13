@@ -1,0 +1,69 @@
+      * This file is installed in the following path when you install
+      * the database: $ORACLE_HOME/rdbms/demo/lobs/procob/ldisbuf.pco
+
+     * DISABLING LOB BUFFERING (PERSISTENT LOBS)
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. LOB-BUFFERING.
+       ENVIRONMENT DIVISION.
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+
+       01  USERID   PIC X(11) VALUES "SAMP/SAMP".
+       01  BLOB1          SQL-BLOB.
+       01  BUFFER         PIC X(10).
+       01  AMT            PIC S9(9) COMP.
+           EXEC SQL VAR BUFFER IS RAW(10) END-EXEC.
+           EXEC SQL INCLUDE SQLCA END-EXEC.
+
+       PROCEDURE DIVISION.
+       LOB-BUFFERING.
+
+           EXEC SQL WHENEVER SQLERROR DO PERFORM SQL-ERROR END-EXEC.
+           EXEC SQL
+                CONNECT :USERID
+           END-EXEC.
+ 
+      * Allocate and initialize the BLOB locator: 
+           EXEC SQL ALLOCATE :BLOB1 END-EXEC.
+
+           EXEC SQL WHENEVER NOT FOUND GOTO END-OF-BLOB END-EXEC.
+           EXEC SQL 
+                SELECT SOUND INTO :BLOB1
+                FROM MULTIMEDIA_TAB 
+                WHERE CLIP_ID = 1 FOR UPDATE
+           END-EXEC.
+ 
+      * Open the BLOB and enable buffering: 
+           EXEC SQL LOB OPEN :BLOB1 READ WRITE END-EXEC.
+           EXEC SQL 
+                LOB ENABLE BUFFERING :BLOB1 
+           END-EXEC.
+        
+      * Write some data to the BLOB: 
+           MOVE "242424" TO BUFFER.
+           MOVE 3 TO AMT.
+           EXEC SQL LOB WRITE :AMT FROM :BUFFER INTO :BLOB1 END-EXEC.
+
+           MOVE "212121" TO BUFFER.
+           MOVE 3 TO AMT.
+           EXEC SQL LOB WRITE :AMT FROM :BUFFER INTO :BLOB1 END-EXEC.
+
+      * Now flush the buffered writes: 
+           EXEC SQL LOB FLUSH BUFFER :BLOB1 END-EXEC.
+           EXEC SQL LOB DISABLE BUFFERING :BLOB1 END-EXEC.
+           EXEC SQL LOB CLOSE :BLOB1 END-EXEC.
+
+       END-OF-BLOB.
+           EXEC SQL WHENEVER NOT FOUND CONTINUE END-EXEC.
+           EXEC SQL FREE :BLOB1 END-EXEC.
+           EXEC SQL ROLLBACK WORK RELEASE END-EXEC.
+           STOP RUN.
+
+       SQL-ERROR.
+           EXEC SQL WHENEVER SQLERROR CONTINUE END-EXEC.
+           DISPLAY " ".
+           DISPLAY "ORACLE ERROR DETECTED:".
+           DISPLAY " ".
+           DISPLAY SQLERRMC.
+           EXEC SQL ROLLBACK WORK RELEASE END-EXEC.
+           STOP RUN.

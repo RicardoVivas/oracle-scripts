@@ -1,0 +1,39 @@
+/* This file is installed in the following path when you install */
+/* the database: $ORACLE_HOME/rdbms/demo/lobs/proc/fcopyloc.pc */
+
+/* Copying a LOB locator for a BFILE. */
+
+#include <oci.h>
+#include <stdio.h>
+#include <sqlca.h>
+
+void Sample_Error()
+{
+  EXEC SQL WHENEVER SQLERROR CONTINUE;
+  printf("%.*s\n", sqlca.sqlerrm.sqlerrml, sqlca.sqlerrm.sqlerrmc);
+  EXEC SQL ROLLBACK WORK RELEASE;
+  exit(1);
+}
+
+void BFILEAssign_proc()
+{
+  OCIBFileLocator *Lob_loc1, *Lob_loc2;
+
+  EXEC SQL WHENEVER SQLERROR DO Sample_Error();
+  EXEC SQL ALLOCATE :Lob_loc1;
+  EXEC SQL ALLOCATE :Lob_loc2;
+  EXEC SQL SELECT ad_graphic INTO :Lob_loc1
+           FROM Print_media WHERE product_id = 2056 AND ad_id = 12001;
+  /* Assign Lob_loc1 to Lob_loc2 so that they both refer to the same
+     operating system file:  */
+  EXEC SQL LOB ASSIGN :Lob_loc1 TO :Lob_loc2;
+  /* Now you can read the BFILE from either Lob_loc1 or Lob_loc2 */
+}
+
+void main()
+{
+  char *samp = "samp/samp";
+  EXEC SQL CONNECT :samp;
+  BFILEAssign_proc();
+  EXEC SQL ROLLBACK WORK RELEASE;
+}

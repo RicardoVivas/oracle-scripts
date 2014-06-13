@@ -1,3 +1,7 @@
+-- Copied from oracle docs "security guide"
+
+-- run as sysdba
+
 grant create session, create any context, create procedure, create trigger, administer database trigger to sysadmin_vpd identified by password;
 grant execute on dbms_session to sysadmin_vpd;
 grant execute on dbms_rls to sysadmin_vpd;
@@ -80,7 +84,7 @@ end;
 
 
 
-
+--
 
 
 

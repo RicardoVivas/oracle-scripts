@@ -1,0 +1,51 @@
+/* This file is installed in the following path when you install */
+/* the database: $ORACLE_HOME/rdbms/demo/lobs/proc/fread.pc */
+
+/* Reading data from BFILE.  */
+
+#include <oci.h>
+#include <stdio.h>
+#include <sqlca.h>
+
+void Sample_Error()
+{
+  EXEC SQL WHENEVER SQLERROR CONTINUE;
+  printf("%.*s\n", sqlca.sqlerrm.sqlerrml, sqlca.sqlerrm.sqlerrmc);
+  EXEC SQL ROLLBACK WORK RELEASE;
+  exit(1);
+}
+
+#define BufferLength 4096
+
+void readBFILE_proc()
+{
+  OCIBFileLocator *Lob_loc;
+  /* Amount and BufferLength are equal so only one READ is necessary: */
+  int Amount = BufferLength;
+  char Buffer[BufferLength];
+  /* Datatype Equivalencing is Mandatory for this Datatype: */
+  EXEC SQL VAR Buffer IS RAW(BufferLength);
+
+  EXEC SQL WHENEVER SQLERROR DO Sample_Error();
+  EXEC SQL ALLOCATE :Lob_loc;
+  EXEC SQL SELECT ad_graphic INTO :Lob_loc
+           FROM Print_media WHERE Product_ID = 2056;
+  /* Open the BFILE: */
+  EXEC SQL LOB OPEN :Lob_loc READ ONLY;
+  EXEC SQL WHENEVER NOT FOUND CONTINUE;
+  /* Read data: */
+  EXEC SQL LOB READ :Amount FROM :Lob_loc INTO :Buffer;
+  printf("Read %d bytes\n", Amount);
+  /* Close the BFILE: */
+  EXEC SQL LOB CLOSE :Lob_loc;
+  EXEC SQL FREE :Lob_loc;
+}
+
+void main()
+{
+  char *samp = "samp/samp";
+  EXEC SQL CONNECT :samp;
+  readBFILE_proc();
+  EXEC SQL ROLLBACK WORK RELEASE;
+}
+

@@ -1,0 +1,43 @@
+/* This file is installed in the following path when you install */
+/* the database: $ORACLE_HOME/rdbms/demo/lobs/proc/fupdate.pc */
+
+/* Updating a BFILE by initializing a BFILE locator. */
+
+#include <oci.h>
+#include <stdio.h>
+#include <sqlca.h>
+
+void Sample_Error()
+{
+  EXEC SQL WHENEVER SQLERROR CONTINUE;
+  printf("%.*s\n", sqlca.sqlerrm.sqlerrml, sqlca.sqlerrm.sqlerrmc);
+  EXEC SQL ROLLBACK WORK RELEASE;
+  exit(1);
+}
+
+void updateUseBindVariable_proc(Lob_loc)
+  OCIBFileLocator *Lob_loc;
+{
+  EXEC SQL WHENEVER SQLERROR DO Sample_Error();
+  EXEC SQL UPDATE Print_media SET ad_graphic = :Lob_loc 
+       WHERE product_ID = 2056 AND ad_id = 12001;
+}
+
+void updateBFILE_proc()
+{
+  OCIBFileLocator *Lob_loc;
+
+  EXEC SQL ALLOCATE :Lob_loc;
+  EXEC SQL SELECT ad_graphic INTO :Lob_loc
+           FROM Print_media WHERE product_id = 2056 AND ad_id 12001;
+  updateUseBindVariable_proc(Lob_loc);
+  EXEC SQL FREE :Lob_loc;
+}
+
+void main()
+{
+  char *samp = "samp/samp";
+  EXEC SQL CONNECT :samp;
+  updateBFILE_proc();
+  EXEC SQL ROLLBACK WORK RELEASE;
+}

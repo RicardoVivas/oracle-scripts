@@ -1,0 +1,43 @@
+/* This file is installed in the following path when you install */
+/* the database: $ORACLE_HOME/rdbms/demo/lobs/proc/lerase.pc */
+
+/* Erasing part of a LOB */
+#include <oci.h>
+#include <stdio.h>
+#include <sqlca.h>
+
+void Sample_Error()
+{
+  EXEC SQL WHENEVER SQLERROR CONTINUE;
+  printf("%.*s\n", sqlca.sqlerrm.sqlerrml, sqlca.sqlerrm.sqlerrmc);
+  EXEC SQL ROLLBACK WORK RELEASE;
+  exit(1);
+}
+
+void eraseLob_proc()
+{
+  OCIBlobLocator *Lob_loc;
+  int Amount = 5;
+  int Offset = 5;
+
+  EXEC SQL WHENEVER SQLERROR DO Sample_Error();
+  EXEC SQL ALLOCATE :Lob_loc;
+  EXEC SQL SELECT ad_composite INTO :Lob_loc
+           FROM Print_media WHERE product_id = 3060 AND ad_id = 11001 FOR UPDATE;
+  /* Opening the LOB is Optional: */
+  EXEC SQL LOB OPEN :Lob_loc READ WRITE;
+  /* Erase the data starting at the specified Offset: */
+  EXEC SQL LOB ERASE :Amount FROM :Lob_loc AT :Offset;
+  printf("Erased %d bytes\n", Amount);
+  /* Closing the LOB is mandatory if it has been opened: */
+  EXEC SQL LOB CLOSE :Lob_loc;
+  EXEC SQL FREE :Lob_loc;
+}
+
+void main()
+{
+  char *samp = "samp/samp";
+  EXEC SQL CONNECT :samp;
+  eraseLob_proc();
+  EXEC SQL ROLLBACK WORK RELEASE;
+}

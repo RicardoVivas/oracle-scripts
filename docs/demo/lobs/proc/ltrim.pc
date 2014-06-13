@@ -1,0 +1,74 @@
+/* This file is installed in the following path when you install */
+/* the database: $ORACLE_HOME/rdbms/demo/lobs/proc/ltrim.pc */
+
+/* Trimming LOB data  */
+#include "pers_trim.h"
+#include <stdio.h>
+#include <sqlca.h>
+void Sample_Error()
+{
+  EXEC SQL WHENEVER SQLERROR CONTINUE;
+  printf("sqlcode = %ld\n", sqlca.sqlcode);
+  printf("%.*s\n", sqlca.sqlerrm.sqlerrml, sqlca.sqlerrm.sqlerrmc);
+  EXEC SQL ROLLBACK WORK RELEASE;
+  exit(1);
+}
+
+void trimLOB_proc()
+{
+  voiced_typ_ref *vt_ref;
+  voiced_typ *vt_typ;
+  OCIClobLocator *Lob_loc;
+  unsigned int Length, trimLength;
+
+  EXEC SQL WHENEVER SQLERROR DO Sample_Error();
+  EXEC SQL ALLOCATE :Lob_loc;
+  EXEC SQL ALLOCATE :vt_ref;
+  EXEC SQL ALLOCATE :vt_typ;
+
+  /* Retrieve the REF using Associative SQL */
+           EXEC SQL SELECT PMtab.ad_sourctext INTO :vt_ref
+           FROM Print_media PMtab 
+           WHERE PMtab.product_id = 3060 AND ad_id = 11001 FOR UPDATE;
+
+  /* Dereference the Object using the Navigational Interface */
+  EXEC SQL OBJECT DEREF :vt_ref INTO :vt_typ FOR UPDATE;
+  Lob_loc = vt_typ->script; 
+
+  /* Opening the LOB is Optional */
+  EXEC SQL LOB OPEN :Lob_loc READ WRITE;
+  EXEC SQL LOB DESCRIBE :Lob_loc GET LENGTH INTO :Length;
+  printf("Old length was %d\n", Length);
+  trimLength = (unsigned int)(Length / 2);
+
+  /* Trim the LOB to its new length */
+  EXEC SQL LOB TRIM :Lob_loc TO :trimLength;
+
+  /* Closing the LOB is mandatory if it has been opened */
+  EXEC SQL LOB CLOSE :Lob_loc;
+
+  /* Mark the Object as Modified (Dirty) */
+  EXEC SQL OBJECT UPDATE :vt_typ;
+
+  /* Flush the changes to the LOB in the Object Cache */
+  EXEC SQL OBJECT FLUSH :vt_typ;
+
+  /* Display the new (modified) length */
+  EXEC SQL SELECT Mtab.Voiced_ref.Script INTO :Lob_loc
+           FROM Multimedia_tab Mtab WHERE Mtab.Clip_ID = 2;
+  EXEC SQL LOB DESCRIBE :Lob_loc GET LENGTH INTO :Length;
+  printf("New length is now %d\n", Length);
+
+  /* Free the Objects and the LOB Locator */
+  EXEC SQL FREE :vt_ref;
+  EXEC SQL FREE :vt_typ;
+  EXEC SQL FREE :Lob_loc;
+}
+
+void main()
+{
+  char *samp = "samp/samp";
+  EXEC SQL CONNECT :samp;
+  trimLOB_proc();
+  EXEC SQL ROLLBACK WORK RELEASE;
+}

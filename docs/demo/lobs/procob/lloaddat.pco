@@ -1,0 +1,69 @@
+      * This file is installed in the following path when you install
+      * the database: $ORACLE_HOME/rdbms/demo/lobs/procob/lloaddat.pco
+
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. LOB-LOAD.
+       ENVIRONMENT DIVISION.
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+
+       01  DEST           SQL-BLOB.
+       01  BFILE1         SQL-BFILE.
+       01  DIR-ALIAS      PIC X(30) VARYING.
+       01  FNAME          PIC X(20) VARYING.
+      * Declare the amount to load.  The value here
+      * was chosen arbitrarily
+       01  LOB-AMT        PIC S9(9) COMP VALUE 10.
+       01  USERID   PIC X(11) VALUES "PM/PM".
+           EXEC SQL INCLUDE SQLCA END-EXEC.
+       PROCEDURE DIVISION.
+       LOB-LOAD.
+
+           EXEC SQL WHENEVER SQLERROR DO PERFORM SQL-ERROR END-EXEC.
+           EXEC SQL CONNECT :USERID END-EXEC.
+
+      * Allocate and initialize the BFILE locator
+           EXEC SQL ALLOCATE :BFILE1 END-EXEC.
+
+      * Set up the directory and file information
+           MOVE "ADGRAPHIC_DIR" TO DIR-ALIAS-ARR.
+           MOVE 9 TO DIR-ALIAS-LEN.
+           MOVE "keyboard_3106_13001" TO FNAME-ARR.
+           MOVE 16 TO FNAME-LEN.
+
+           EXEC SQL 
+              LOB FILE SET :BFILE1 DIRECTORY = :DIR-ALIAS,FILENAME = :FNAME 
+           END-EXEC.
+
+      * Allocate and initialize the destination BLOB
+           EXEC SQL ALLOCATE :DEST END-EXEC.
+           EXEC SQL WHENEVER NOT FOUND GOTO END-OF-BLOB END-EXEC.
+           EXEC SQL SELECT AD_GRAPHIC INTO :DEST
+           FROM PRINT_MEDIA WHERE PRODUCT_ID = 2268 AND AD_ID = 21001 FOR UPDATE END-EXEC.
+  
+      * Open the source BFILE for READ
+           EXEC SQL LOB OPEN :BFILE1 READ ONLY END-EXEC.
+
+      * Open the destination BLOB for READ/WRITE 
+           EXEC SQL LOB OPEN :DEST READ WRITE END-EXEC.
+
+      * Load the destination BLOB from the source BFILE
+           EXEC SQL LOB LOAD :LOB-AMT FROM FILE :BFILE1 INTO :DEST END-EXEC.
+
+      * Close the source and destination LOBs
+           EXEC SQL LOB CLOSE :BFILE1 END-EXEC.
+           EXEC SQL LOB CLOSE :DEST END-EXEC.
+       END-OF-BLOB.
+           EXEC SQL FREE :DEST END-EXEC.
+           EXEC SQL FREE :BFILE1 END-EXEC.
+           EXEC SQL ROLLBACK WORK RELEASE END-EXEC.
+           STOP RUN.
+       SQL-ERROR.
+           EXEC SQL
+              WHENEVER SQLERROR CONTINUE END-EXEC.
+           DISPLAY " ".
+           DISPLAY "ORACLE ERROR DETECTED:".
+           DISPLAY " ".
+           DISPLAY SQLERRMC.
+           EXEC SQL ROLLBACK WORK RELEASE END-EXEC.
+           STOP RUN.

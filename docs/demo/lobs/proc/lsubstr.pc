@@ -1,0 +1,60 @@
+/* This file is installed in the following path when you install */
+/* the database: $ORACLE_HOME/rdbms/demo/lobs/proc/lsubstr.pc */
+
+/* Reading portion of the LOB using (substr). Pro*C/C++ lacks an equivalent 
+   embedded SQL form for the DBMS_LOB.SUBSTR() function.  
+   However, Pro*C/C++ can interoperate with PL/SQL using anonymous
+   PL/SQL blocks embedded in a Pro*C/C++ program as this example shows: */
+
+#include <oci.h>
+#include <stdio.h>
+#include <sqlca.h>
+void Sample_Error()
+{
+  EXEC SQL WHENEVER SQLERROR CONTINUE;
+  printf("%.*s\n", sqlca.sqlerrm.sqlerrml, sqlca.sqlerrm.sqlerrmc);
+  EXEC SQL ROLLBACK WORK RELEASE;
+  exit(1);
+}
+
+#define BufferLength 32767
+
+void substringLOB_proc()
+{
+  OCIBlobLocator *Lob_loc;
+  int Position = 1;
+  int Amount = BufferLength;
+  struct {
+    unsigned short Length;
+    char Data[BufferLength];
+  } Buffer;
+  /* Datatype equivalencing is mandatory for this datatype: */
+  EXEC SQL VAR Buffer IS VARRAW(BufferLength);
+
+  EXEC SQL WHENEVER SQLERROR DO Sample_Error();
+  EXEC SQL ALLOCATE :Lob_loc;
+  EXEC SQL SELECT ad_photo INTO Lob_loc
+           FROM Print_media WHERE product_id = 3060 AND ad_id = 11001;
+  /* Open the BLOB: */
+  EXEC SQL LOB OPEN :Lob_loc READ ONLY;
+  /* Invoke SUBSTR() from within an anonymous PL/SQL block: */
+  EXEC SQL EXECUTE
+    BEGIN
+      :Buffer := DBMS_LOB.SUBSTR(:Lob_loc, :Amount, :Position);
+    END;
+  END-EXEC;
+  /* Close the BLOB: */
+  EXEC SQL LOB CLOSE :Lob_loc;
+  /* Process the Data */
+  /* Release resources used by the locator: */
+  EXEC SQL FREE :Lob_loc;
+}
+
+void main()
+{
+  char *samp = "samp/samp";
+  EXEC SQL CONNECT :samp;
+  substringLOB_proc();
+  EXEC SQL ROLLBACK WORK RELEASE;
+  exit(0);
+}

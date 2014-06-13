@@ -1,0 +1,61 @@
+      * This file is installed in the following path when you install
+      * the database: $ORACLE_HOME/rdbms/demo/lobs/procob/ldisplay.pco
+
+     * DISPLAYING LOB DATA
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. DISPLAY-BLOB.
+       ENVIRONMENT DIVISION.
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+
+       01  USERID   PIC X(11) VALUES "SAMP/SAMP".
+       01  BLOB1          SQL-BLOB.
+       01  BUFFER2        PIC X(5) VARYING.
+       01  AMT            PIC S9(9) COMP.
+       01  OFFSET         PIC S9(9) COMP VALUE 1.
+       01  D-AMT          PIC 9.
+
+           EXEC SQL VAR BUFFER2 IS RAW(5) END-EXEC.
+           EXEC SQL INCLUDE SQLCA END-EXEC.
+
+       PROCEDURE DIVISION.
+       DISPLAY-BLOB.
+           EXEC SQL WHENEVER SQLERROR DO PERFORM SQL-ERROR END-EXEC.
+           EXEC SQL CONNECT :USERID END-EXEC.
+      * Allocate and initialize the BLOB locator: 
+           EXEC SQL ALLOCATE :BLOB1 END-EXEC.
+            EXEC SQL WHENEVER NOT FOUND GOTO END-OF-BLOB END-EXEC.
+             EXEC SQL SELECT PM.AD_PHOTO INTO :BLOB1
+              FROM PRINT_MEDIA PM WHERE PM.PRODUCT_ID = 2268 AND AD_ID = 21001 END-EXEC.
+           DISPLAY "Found column AD_PHOTO".
+      * Initiate polling read:
+           MOVE 0 TO AMT.
+
+           EXEC SQL LOB READ :AMT FROM :BLOB1 AT :OFFSET
+              INTO :BUFFER2 END-EXEC.
+           DISPLAY " ".
+           MOVE AMT TO D-AMT.
+           DISPLAY "first read (", D-AMT, "): " BUFFER2.
+        READ-BLOB-LOOP.
+           MOVE "     " TO BUFFER2.
+           EXEC SQL LOB READ :AMT FROM :BLOB1 INTO :BUFFER2 END-EXEC.
+            MOVE AMT TO D-AMT.
+            DISPLAY "next read (", D-AMT, "): " BUFFER2.
+           GO TO READ-BLOB-LOOP.
+ 
+       END-OF-BLOB.
+           EXEC SQL WHENEVER NOT FOUND CONTINUE END-EXEC.
+           EXEC SQL FREE :BLOB1 END-EXEC.
+           MOVE AMT TO D-AMT.
+           DISPLAY "last read (", D-AMT, "): " BUFFER2(1:AMT).
+           EXEC SQL ROLLBACK WORK RELEASE END-EXEC.
+           STOP RUN.
+
+       SQL-ERROR.
+           EXEC SQL WHENEVER SQLERROR CONTINUE END-EXEC.
+           DISPLAY " ".
+           DISPLAY "ORACLE ERROR DETECTED:".
+           DISPLAY " ".
+           DISPLAY SQLERRMC.
+           EXEC SQL ROLLBACK WORK RELEASE END-EXEC.
+           STOP RUN.

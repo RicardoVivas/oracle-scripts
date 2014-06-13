@@ -1,0 +1,56 @@
+      * This file is installed in the following path when you install
+      * the database: $ORACLE_HOME/rdbms/demo/lobs/procob/fgetdir.pco
+
+     * Getting the directory alias and filename 
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. BFILE-DIR-ALIAS.
+       ENVIRONMENT DIVISION.
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+       01  USERID         PIC X(11) VALUES "SAMP/SAMP".
+       01  BFILE1         SQL-BFILE.
+       01  DIR-ALIAS      PIC X(30) VARYING.
+       01  FNAME          PIC X(30) VARYING.
+       01  ORASLNRD       PIC 9(4).
+
+           EXEC SQL INCLUDE SQLCA END-EXEC.
+           EXEC ORACLE OPTION (ORACA=YES) END-EXEC.
+           EXEC SQL INCLUDE ORACA END-EXEC.
+
+       PROCEDURE DIVISION.
+       BFILE-DIR-ALIAS.
+
+           EXEC SQL WHENEVER SQLERROR DO PERFORM SQL-ERROR END-EXEC.
+           EXEC SQL
+                CONNECT :USERID
+           END-EXEC.
+
+      * Allocate and initialize the BFILE locator: 
+           EXEC SQL ALLOCATE :BFILE1 END-EXEC.
+           EXEC SQL WHENEVER NOT FOUND GOTO END-OF-BFILE END-EXEC.
+
+      * Populate the BFILE locator: 
+           EXEC SQL 
+                SELECT AD_GRAPHIC INTO :BFILE1
+                FROM PRINT_MEDIA WHERE PRODUCT_ID = 3106 AND AD_ID = 13001
+           END-EXEC.
+
+      * Use the LOB DESCRIBE functionality to get 
+      * the directory alias and the filename: 
+           EXEC SQL LOB DESCRIBE :BFILE1 
+                GET DIRECTORY, FILENAME INTO :DIR-ALIAS, :FNAME END-EXEC.
+      
+           DISPLAY "DIRECTORY: ", DIR-ALIAS-ARR, "FNAME: ", FNAME-ARR.
+       END-OF-BFILE.
+           EXEC SQL WHENEVER NOT FOUND CONTINUE END-EXEC.
+           EXEC SQL FREE :BFILE1 END-EXEC.
+           STOP RUN.
+       SQL-ERROR.
+           EXEC SQL WHENEVER SQLERROR CONTINUE END-EXEC.
+           MOVE ORASLNR TO ORASLNRD.
+           DISPLAY " ".
+           DISPLAY "ORACLE ERROR DETECTED ON LINE ", ORASLNRD, ":".
+           DISPLAY " ".
+           DISPLAY SQLERRMC.
+           EXEC SQL ROLLBACK WORK RELEASE END-EXEC.
+           STOP RUN.

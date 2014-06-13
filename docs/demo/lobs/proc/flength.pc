@@ -1,0 +1,45 @@
+/* This file is installed in the following path when you install */
+/* the database: $ORACLE_HOME/rdbms/demo/lobs/proc/flength.pc */
+
+/* Getting the length of a BFILE. */
+
+#include <oci.h>
+#include <stdio.h>
+#include <sqlca.h>
+
+void Sample_Error()
+{
+  EXEC SQL WHENEVER SQLERROR CONTINUE;
+  printf("%.*s\n", sqlca.sqlerrm.sqlerrml, sqlca.sqlerrm.sqlerrmc);
+  EXEC SQL ROLLBACK WORK RELEASE;
+  exit(1);
+}
+
+void getLengthBFILE_proc()
+{
+  OCIBFileLocator *Lob_loc;
+  unsigned int Length = 0;
+
+  EXEC SQL WHENEVER SQLERROR DO Sample_Error();
+  EXEC SQL ALLOCATE :Lob_loc;
+  EXEC SQL SELECT PMtab.ad_graphic INTO :Lob_loc
+           FROM Print_media PMtab 
+           WHERE PMtab.product_id = 3060 AND ad_id = 11001;
+  /* Open the BFILE: */
+  EXEC SQL LOB OPEN :Lob_loc READ ONLY;
+  /* Get the Length: */
+  EXEC SQL LOB DESCRIBE :Lob_loc GET LENGTH INTO :Length;
+  /* If the BFILE is NULL or unitialized, then Length is Undefined: */
+  printf("Length is %d bytes\n", Length);
+  /* Close the BFILE: */
+  EXEC SQL LOB CLOSE :Lob_loc;
+  EXEC SQL FREE :Lob_loc;
+} 
+
+void main()
+{
+  char *samp = "samp/samp";
+  EXEC SQL CONNECT :samp;
+  getLengthBFILE_proc();
+  EXEC SQL ROLLBACK WORK RELEASE;
+}

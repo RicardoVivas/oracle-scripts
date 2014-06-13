@@ -1,0 +1,59 @@
+/* This file is installed in the following path when you install */
+/* the database: $ORACLE_HOME/rdbms/demo/lobs/proc/lcompare.pc */
+
+/* Comparing all or part of two LOBs
+#include <oci.h>
+#include <stdio.h>
+#include <sqlca.h>
+
+void Sample_Error()
+{
+  EXEC SQL WHENEVER SQLERROR CONTINUE;
+  printf("%.*s\n", sqlca.sqlerrm.sqlerrml, sqlca.sqlerrm.sqlerrmc);
+  EXEC SQL ROLLBACK WORK RELEASE;
+  exit(1);
+}
+
+void compareTwoLobs_proc()
+{
+  OCIBlobLocator *Lob_loc1, *Lob_loc2;
+  int Amount = 32767;
+  int Retval;
+
+  EXEC SQL WHENEVER SQLERROR DO Sample_Error();
+  /* Allocate the LOB locators: */
+  EXEC SQL ALLOCATE :Lob_loc1;
+  EXEC SQL ALLOCATE :Lob_loc2;
+  /* Select the LOBs: */
+  EXEC SQL SELECT ad_composite INTO :Lob_loc1
+     FROM Print_media WHERE product_id = 3060 AND ad_id = 11001;
+  EXEC SQL SELECT ad_composite INTO :Lob_loc2
+     FROM Print_media WHERE product_id = 2056 AND ad_id = 12001;
+  /* Opening the LOBs is Optional: */
+  EXEC SQL LOB OPEN :Lob_loc1 READ ONLY;
+  EXEC SQL LOB OPEN :Lob_loc2 READ ONLY;
+  /* Compare the two Frames using DBMS_LOB.COMPARE() from within PL/SQL: */
+  EXEC SQL EXECUTE
+     BEGIN
+        :Retval := DBMS_LOB.COMPARE(:Lob_loc1, :Lob_loc2, :Amount, 1, 1);
+     END;
+  END-EXEC;
+  if (0 == Retval)
+     printf("The frames are equal\n");
+  else
+     printf("The frames are not equal\n");
+  /* Closing the LOBs is mandatory if you have opened them: */
+  EXEC SQL LOB CLOSE :Lob_loc1;
+  EXEC SQL LOB CLOSE :Lob_loc2;
+  /* Release resources held by the locators: */
+  EXEC SQL FREE :Lob_loc1;
+  EXEC SQL FREE :Lob_loc2;
+}
+
+void main()
+{
+  char *samp = "samp/samp";
+  EXEC SQL CONNECT :samp;
+  compareTwoLobs_proc();
+  EXEC SQL ROLLBACK WORK RELEASE;
+}

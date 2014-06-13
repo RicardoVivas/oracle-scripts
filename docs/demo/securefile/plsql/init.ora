@@ -1,0 +1,6 @@
+
+#<your init.ora parameters >
+
+compatible=11.0.0.0
+
+

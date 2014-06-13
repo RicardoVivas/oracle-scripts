@@ -1,0 +1,55 @@
+      * This file is installed in the following path when you install
+      * the database: $ORACLE_HOME/rdbms/demo/lobs/procob/lwriteap.pco
+
+      * WRITE-APPENDING TO A LOB
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. WRITE-APPEND-BLOB.
+       ENVIRONMENT DIVISION.
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+
+       01  BLOB1         SQL-BLOB.
+       01  AMT           PIC S9(9) COMP.
+       01  BUFFER        PIC X(32767) VARYING.
+           EXEC SQL VAR BUFFER IS LONG RAW (32767) END-EXEC.
+       01  USERID   PIC X(11) VALUES "SAMP/SAMP".
+           EXEC SQL INCLUDE SQLCA END-EXEC.
+        
+       PROCEDURE DIVISION.
+       WRITE-APPEND-BLOB.
+
+           EXEC SQL WHENEVER SQLERROR DO PERFORM SQL-ERROR END-EXEC.
+           EXEC SQL CONNECT :USERID END-EXEC.
+
+      * Allocate and initialize the BLOB locators: 
+           EXEC SQL ALLOCATE :BLOB1 END-EXEC.
+           EXEC SQL WHENEVER NOT FOUND GOTO END-OF-BLOB END-EXEC.
+           EXEC SQL SELECT AD_COMPOSITE INTO :BLOB1
+                FROM PRINT_MEDIA 
+                WHERE PRODUCT_ID = 3106 AND AD_ID = 13001 FOR UPDATE END-EXEC.
+ 
+      * Open the target LOB: 
+           EXEC SQL LOB OPEN :BLOB1 READ WRITE END-EXEC.
+
+      *    Populate AMT here: 
+           MOVE 5 TO AMT.
+           MOVE "2424242424" to BUFFER.
+
+      * Append the source LOB to the destination LOB: 
+           EXEC SQL LOB WRITE APPEND :AMT FROM :BUFFER INTO :BLOB1 END-EXEC.
+           EXEC SQL LOB CLOSE :BLOB1 END-EXEC.
+
+       END-OF-BLOB.
+           EXEC SQL WHENEVER NOT FOUND CONTINUE END-EXEC.
+           EXEC SQL FREE :BLOB1 END-EXEC.
+           EXEC SQL ROLLBACK WORK RELEASE END-EXEC.
+           STOP RUN.
+
+       SQL-ERROR.
+           EXEC SQL WHENEVER SQLERROR CONTINUE END-EXEC.
+           DISPLAY " ".
+           DISPLAY "ORACLE ERROR DETECTED:".
+           DISPLAY " ".
+           DISPLAY SQLERRMC.
+           EXEC SQL ROLLBACK WORK RELEASE END-EXEC.
+           STOP RUN.

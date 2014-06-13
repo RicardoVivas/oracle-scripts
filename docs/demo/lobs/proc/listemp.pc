@@ -1,0 +1,46 @@
+/* This file is installed in the following path when you install */
+/* the database: $ORACLE_HOME/rdbms/demo/lobs/proc/listemp.pc */
+
+/* Checking if a LOB is temporary.
+#include <oci.h>
+#include <stdio.h>
+#include <sqlca.h>
+
+void Sample_Error()
+{
+  EXEC SQL WHENEVER SQLERROR CONTINUE;
+  printf("%.*s\n", sqlca.sqlerrm.sqlerrml, sqlca.sqlerrm.sqlerrmc);
+  EXEC SQL ROLLBACK WORK RELEASE;
+  exit(1);
+}
+
+void lobIsTemp_proc()
+{
+  OCIBlobLocator *Temp_loc;
+  int isTemporary = 0;
+
+  EXEC SQL WHENEVER SQLERROR DO Sample_Error();
+  /* Allocate and Create the Temporary LOB: */
+  EXEC SQL ALLOCATE :Temp_loc;
+  EXEC SQL LOB CREATE TEMPORARY :Temp_loc;
+  /* Determine if the Locator is a Temporary LOB Locator: */
+  EXEC SQL LOB DESCRIBE :Temp_loc GET ISTEMPORARY INTO :isTemporary;
+   
+  /* Note that in this example, isTemporary should be 1 (TRUE) */
+  if (isTemporary)
+    printf("Locator is a Temporary LOB locator\n");
+  /* Free the Temporary LOB: */
+  EXEC SQL LOB FREE TEMPORARY :Temp_loc;
+  /* Release resources held by the Locator: */
+  EXEC SQL FREE :Temp_loc;
+else
+    printf("Locator is not a Temporary LOB locator \n");
+   }
+
+void main()
+{
+  char *samp = "samp/samp";
+  EXEC SQL CONNECT :samp;
+  lobIsTemp_proc();
+  EXEC SQL ROLLBACK WORK RELEASE;
+}

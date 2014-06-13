@@ -1,0 +1,57 @@
+      * This file is installed in the following path when you install
+      * the database: $ORACLE_HOME/rdbms/demo/lobs/procob/ltrim.pco
+
+     * Trimming LOB data
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. TRIM-CLOB.
+       ENVIRONMENT DIVISION.
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+
+       01  CLOB1          SQL-CLOB.
+       01  NEW-LEN        PIC S9(9) COMP.
+      * Define the source and destination position and location: 
+       01  SRC-POS        PIC S9(9) COMP.
+       01  DEST-POS       PIC S9(9) COMP.
+       01  SRC-LOC        PIC S9(9) COMP.
+       01  DEST-LOC       PIC S9(9) COMP.
+       01  USERID   PIC X(11) VALUES "SAMP/SAMP".
+           EXEC SQL INCLUDE SQLCA END-EXEC.
+        
+       PROCEDURE DIVISION.
+       TRIM-CLOB.
+           EXEC SQL WHENEVER SQLERROR DO PERFORM SQL-ERROR END-EXEC.
+           EXEC SQL CONNECT :USERID END-EXEC.
+
+      * Allocate and initialize the CLOB locators: 
+           EXEC SQL ALLOCATE :CLOB1 END-EXEC.
+           EXEC SQL WHENEVER NOT FOUND GOTO END-OF-CLOB END-EXEC.
+           EXEC SQL 
+                SELECT PM.AD_SOURCETEXT INTO :CLOB1
+                FROM PRINT_MEDIA PM
+                WHERE PM.PRODUCT_ID = 3060 
+                AND AD_ID = 11001 FOR UPDATE END-EXEC.
+ 
+      * Open the CLOB: 
+           EXEC SQL LOB OPEN :CLOB1 READ WRITE END-EXEC.
+
+      * Move some value to  NEW-LEN: 
+           MOVE 3 TO NEW-LEN.
+           EXEC SQL 
+                LOB TRIM :CLOB1 TO :NEW-LEN END-EXEC.
+
+           EXEC SQL LOB CLOSE :CLOB1 END-EXEC.
+       END-OF-CLOB.
+           EXEC SQL WHENEVER NOT FOUND CONTINUE END-EXEC.
+           EXEC SQL FREE :CLOB1 END-EXEC.
+           EXEC SQL ROLLBACK WORK RELEASE END-EXEC.
+           STOP RUN.
+
+       SQL-ERROR.
+           EXEC SQL WHENEVER SQLERROR CONTINUE END-EXEC.
+           DISPLAY " ".
+           DISPLAY "ORACLE ERROR DETECTED:".
+           DISPLAY " ".
+           DISPLAY SQLERRMC.
+           EXEC SQL ROLLBACK WORK RELEASE END-EXEC.
+           STOP RUN.

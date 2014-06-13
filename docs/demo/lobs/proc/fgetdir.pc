@@ -1,0 +1,51 @@
+/* This file is installed in the following path when you install */
+/* the database: $ORACLE_HOME/rdbms/demo/lobs/proc/fgetdir.pc */
+
+/* Getting the directory alias and filename */
+
+#include <oci.h>
+#include <stdio.h>
+#include <sqlca.h>
+
+void Sample_Error()
+{
+  EXEC SQL WHENEVER SQLERROR CONTINUE;
+  printf("%.*s\n", sqlca.sqlerrm.sqlerrml, sqlca.sqlerrm.sqlerrmc);
+  EXEC SQL ROLLBACK WORK RELEASE;
+  exit(1);
+}
+
+void getBFILEDirectoryAndFilename_proc()
+{
+  OCIBFileLocator *Lob_loc;
+  char Directory[31], Filename[255];
+  /* Datatype Equivalencing is Optional: */
+  EXEC SQL VAR Directory IS STRING;
+  EXEC SQL VAR Filename IS STRING;
+  EXEC SQL WHENEVER SQLERROR DO Sample_Error();
+  EXEC SQL ALLOCATE :Lob_loc;
+
+  /* Select the BFILE: */
+  EXEC SQL SELECT ad_graphic INTO :Lob_loc
+     FROM print_media WHERE product_id = 2056 AND ad_id = 12001;
+  /* Open the BFILE: */
+  EXEC SQL LOB OPEN :Lob_loc READ ONLY;
+  /* Get the Directory Alias and Filename: */
+  EXEC SQL LOB DESCRIBE :Lob_loc
+     GET DIRECTORY, FILENAME INTO :Directory, :Filename;
+
+  /* Close the BFILE: */
+  EXEC SQL LOB CLOSE :Lob_loc;
+  printf("Directory Alias: %s\n", Directory);
+  printf("Filename: %s\n", Filename);
+  /* Release resources held by the locator: */
+  EXEC SQL FREE :Lob_loc;
+}
+
+void main()
+{
+  char *samp = "samp/samp";
+  EXEC SQL CONNECT :samp;
+  getBFILEDirectoryAndFilename_proc();
+  EXEC SQL ROLLBACK WORK RELEASE;
+}

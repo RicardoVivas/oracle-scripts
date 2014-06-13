@@ -1,0 +1,57 @@
+/* This file is installed in the following path when you install */
+/* the database: $ORACLE_HOME/rdbms/demo/lobs/proc/linit.pc */
+
+/* Seeing if a LOB locator is initialized */
+/* Pro*C/C++ has no form of embedded SQL statement to determine if a LOB
+   locator is initialized. Locators in Pro*C/C++ are initialized when they
+   are allocated via the EXEC SQL ALLOCATE statement. An example
+   can be written that uses embedded SQL and the OCI as is shown here: */
+
+#include <sql2oci.h>
+#include <stdio.h>
+#include <sqlca.h>
+
+void Sample_Error()
+{
+  EXEC SQL WHENEVER SQLERROR CONTINUE;
+  printf("%.*s\n", sqlca.sqlerrm.sqlerrml, sqlca.sqlerrm.sqlerrmc);
+  EXEC SQL ROLLBACK WORK RELEASE;
+  exit(1);
+}
+
+void LobLocatorIsInit_proc()
+{
+  OCIBlobLocator *Lob_loc;
+  OCIEnv *oeh;
+  OCIError *err;
+  boolean isInitialized;
+
+  EXEC SQL WHENEVER SQLERROR DO Sample_Error();
+  EXEC SQL ALLOCATE :Lob_loc;
+  EXEC SQL SELECT ad_composite INTO Lob_loc
+           FROM Print_media where product_id = 2056 AND ad_id =  12001;
+  /* Get the OCI Environment Handle using a SQLLIB Routine: */
+  (void) SQLEnvGet(SQL_SINGLE_RCTX, &oeh);
+  /* Allocate the OCI Error Handle: */
+  (void) OCIHandleAlloc((dvoid *)oeh, (dvoid **)&err,
+                        (ub4)OCI_HTYPE_ERROR, (ub4)0, (dvoid **)0);
+  /* Use the OCI to determine if the locator is Initialized: */
+  (void) OCILobLocatorIsInit(oeh, err, Lob_loc, &isInitialized);
+  if (isInitialized)
+    printf("The locator is initialized\n");
+  else
+    printf("The locator is not initialized\n");
+  /* Note that in this example, the locator is initialized */
+  /* Deallocate the OCI Error Handle: */
+  (void) OCIHandleFree(err, OCI_HTYPE_ERROR);
+  /* Release resources held by the locator: */
+  EXEC SQL FREE :Lob_loc;
+}
+
+void main()
+{
+  char *samp = "samp/samp";
+  EXEC SQL CONNECT :samp;
+  LobLocatorIsInit_proc();
+  EXEC SQL ROLLBACK WORK RELEASE;
+}

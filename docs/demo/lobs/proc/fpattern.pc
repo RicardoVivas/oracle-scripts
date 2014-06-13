@@ -1,0 +1,70 @@
+/* This file is installed in the following path when you install */
+/* the database: $ORACLE_HOME/rdbms/demo/lobs/proc/fpattern.pc */
+
+/* Checking if a pattern exists in a BFILE using instr 
+   Pro*C lacks an equivalent embedded SQL form of the DBMS_LOB.INSTR()
+   function. However, like SUBSTR() and COMPARE(), Pro*C/C++ can call
+   DBMS_LOB.INSTR() from within an anonymous PL/SQL block as shown here: */
+
+#include <sql2oci.h>
+#include <stdio.h>
+#include <string.h>
+#include <sqlca.h>
+
+void Sample_Error()
+{
+  EXEC SQL WHENEVER SQLERROR CONTINUE;
+  printf("%.*s\n", sqlca.sqlerrm.sqlerrml, sqlca.sqlerrm.sqlerrmc);
+  EXEC SQL ROLLBACK WORK RELEASE;
+  exit(1);
+}
+
+#define PatternSize 5
+
+void instringBFILE_proc()
+{
+  OCIBFileLocator *Lob_loc;
+  unsigned int Position = 0;
+  int Product_id = 2056, Segment = 1;
+  char Pattern[PatternSize];
+  /* Datatype Equivalencing is Mandatory for this Datatype:  */
+  EXEC SQL VAR Pattern IS RAW(PatternSize);
+
+  EXEC SQL WHENEVER SQLERROR DO Sample_Error();
+  EXEC SQL ALLOCATE :Lob_loc;
+  /* Use Dynamic SQL to retrieve the BFILE Locator:  */
+  EXEC SQL PREPARE S FROM
+    'SELECT Intab.ad_graphic \
+       FROM TABLE(SELECT PMtab.textdoc_ntab FROM Print_media PMtab \
+          WHERE product_id = :cid) PMtab \
+             WHERE PMtab.Segment = :seg';
+  EXEC SQL DECLARE C CURSOR FOR S;
+  EXEC SQL OPEN C USING :Product_ID, :Segment;
+  EXEC SQL FETCH C INTO :Lob_loc;
+  EXEC SQL CLOSE C;
+  /* Open the BFILE: */
+  EXEC SQL LOB OPEN :Lob_loc READ ONLY;
+  memset((void *)Pattern, 0, PatternSize);  
+  /* Find the first occurrance of the pattern starting from the
+     beginning of the BFILE using PL/SQL: */
+  EXEC SQL EXECUTE
+    BEGIN
+      :Position := DBMS_LOB.INSTR(:Lob_loc, :Pattern, 1, 1);
+    END;
+  END-EXEC;
+  /* Close the BFILE: */
+  EXEC SQL LOB CLOSE :Lob_loc;
+  if (0 == Position)
+    printf("Pattern not found\n");
+  else
+    printf("The pattern occurs at %d\n", Position);
+  EXEC SQL FREE :Lob_loc;
+}
+
+void main()
+{
+  char *samp = "samp/samp";
+  EXEC SQL CONNECT :samp;
+  instringBFILE_proc();
+  EXEC SQL ROLLBACK WORK RELEASE;
+}

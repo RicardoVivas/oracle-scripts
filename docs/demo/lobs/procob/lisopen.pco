@@ -1,0 +1,59 @@
+      * This file is installed in the following path when you install
+      * the database: $ORACLE_HOME/rdbms/demo/lobs/procob/lisopen.pco
+
+     * Checking if LOB is Open
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. LOB-OPEN.
+       ENVIRONMENT DIVISION.
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+
+       01  BLOB1          SQL-BLOB.
+       01  LOB-ATTR-GRP.
+           05 ISOPN       PIC S9(9) COMP.
+       01  SRC            SQL-BFILE.
+       01  DIR-ALIAS      PIC X(30) VARYING.
+       01  FNAME          PIC X(20) VARYING.
+       01  DIR-IND        PIC S9(4) COMP.
+       01  FNAME-IND      PIC S9(4) COMP.
+       01  USERID   PIC X(11) VALUES "PM/PM".
+           EXEC SQL INCLUDE SQLCA END-EXEC.
+
+       PROCEDURE DIVISION.
+       LOB-OPEN.
+           EXEC SQL WHENEVER SQLERROR DO PERFORM SQL-ERROR END-EXEC.
+           EXEC SQL CONNECT :USERID END-EXEC.
+
+      * Allocate and initialize the target BLOB
+           EXEC SQL ALLOCATE :BLOB1 END-EXEC.
+           EXEC SQL WHENEVER NOT FOUND GOTO END-OF-BLOB END-EXEC.
+           EXEC SQL SELECT AD_COMPOSITE INTO :BLOB1
+              FROM PRINT_MEDIA WHERE PRODUCT_ID = 3060 AND AD_ID = 11001 END-EXEC.
+  
+      * See if the LOB is OPEN
+           EXEC SQL 
+              LOB DESCRIBE :BLOB1 GET ISOPEN INTO :ISOPN END-EXEC.
+
+           IF ISOPN = 1 
+      *       <Processing for the LOB OPEN case>
+              DISPLAY "The LOB is open"
+           ELSE
+      *         <Processing for the LOB NOT OPEN case>
+              DISPLAY "The LOB is not open"
+           END-IF.
+
+      * Free the resources used by the BLOB
+       END-OF-BLOB.
+           EXEC SQL FREE :BLOB1 END-EXEC.
+           EXEC SQL ROLLBACK WORK RELEASE END-EXEC.
+           STOP RUN.
+
+       SQL-ERROR.
+           EXEC SQL WHENEVER SQLERROR CONTINUE END-EXEC.
+           DISPLAY " ".
+           DISPLAY "ORACLE ERROR DETECTED:".
+           DISPLAY " ".
+           DISPLAY SQLERRMC.
+           EXEC SQL
+              ROLLBACK WORK RELEASE END-EXEC.
+           STOP RUN.

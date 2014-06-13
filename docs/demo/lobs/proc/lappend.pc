@@ -1,0 +1,58 @@
+/* This file is installed in the following path when you install */
+/* the database: $ORACLE_HOME/rdbms/demo/lobs/proc/lappend.pc */
+
+/* Appending one LOB to another */
+#include <oci.h>
+#include <stdio.h>
+#include <sqlca.h>
+
+void Sample_Error()
+{
+  EXEC SQL WHENEVER SQLERROR CONTINUE;
+  printf("%.*s\n", sqlca.sqlerrm.sqlerrml, sqlca.sqlerrm.sqlerrmc);
+  EXEC SQL ROLLBACK WORK RELEASE;
+  exit(1);
+}
+
+void appendLOB_proc()
+{
+  OCIBlobLocator *Dest_loc, *Src_loc;
+  EXEC SQL WHENEVER SQLERROR DO Sample_Error();
+
+  /* Allocate the locators: */
+  EXEC SQL ALLOCATE :Dest_loc;
+  EXEC SQL ALLOCATE :Src_loc;
+
+  /* Select the destination locator: */
+  EXEC SQL SELECT Sound INTO :Dest_loc
+           FROM Print_media WHERE product_id = 2268 AND 
+           ad_id = 21001 FOR UPDATE;
+
+  /* Select the source locator: */
+  EXEC SQL SELECT Sound INTO :Src_loc
+           FROM Print_media WHERE product_id = 3060 AND
+           ad_id = 11001;
+
+  /* Opening the LOBs is Optional: */
+  EXEC SQL LOB OPEN :Dest_loc READ WRITE;
+  EXEC SQL LOB OPEN :Src_loc READ ONLY;
+
+  /* Append the source LOB to the end of the destination LOB: */
+  EXEC SQL LOB APPEND :Src_loc TO :Dest_loc;
+
+  /* Closing the LOBs is mandatory if they have been opened: */
+  EXEC SQL LOB CLOSE :Dest_loc;
+  EXEC SQL LOB CLOSE :Src_loc;
+
+  /* Release resources held by the locators: */
+  EXEC SQL FREE :Dest_loc;
+  EXEC SQL FREE :Src_loc;
+}
+
+void main()
+{
+  char *samp = "samp/samp";
+  EXEC SQL CONNECT :samp;
+  appendLOB_proc();
+  EXEC SQL ROLLBACK WORK RELEASE;
+}

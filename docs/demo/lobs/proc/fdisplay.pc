@@ -1,0 +1,64 @@
+/* This file is installed in the following path when you install */
+/* the database: $ORACLE_HOME/rdbms/demo/lobs/proc/fdisplay.pc */
+
+/* Displaying BFILE data. 
+   This example reads the entire contents of a BFILE piecewise into a
+   buffer using a streaming mechanism via standard polling, displaying each
+   buffer piece after every READ operation until the entire BFILE has been
+   read: */
+
+#include <oci.h>
+#include <stdio.h>
+#include <sqlca.h>
+
+void Sample_Error()
+{
+  EXEC SQL WHENEVER SQLERROR CONTINUE;
+  printf("%.*s\n", sqlca.sqlerrm.sqlerrml, sqlca.sqlerrm.sqlerrmc);
+  EXEC SQL ROLLBACK WORK RELEASE;
+  exit(1);
+}
+
+#define BufferLength 1024
+
+void displayBFILE_proc()
+{
+  OCIBFileLocator *Lob_loc;
+  int Amount;
+  struct {
+    short Length;
+    char Data[BufferLength];
+  } Buffer;
+  /* Datatype Equivalencing is Mandatory for this Datatype: */
+  EXEC SQL VAR Buffer is VARRAW(BufferLength);
+
+  EXEC SQL WHENEVER SQLERROR DO Sample_Error();
+  EXEC SQL ALLOCATE :Lob_loc;
+  /* Select the BFILE: */
+  EXEC SQL SELECT ad_graphic INTO :Lob_loc
+           FROM Print_media WHERE Product_ID = 2056 AND ad_id = 12001;
+  /* Open the BFILE: */
+  EXEC SQL LOB OPEN :Lob_loc READ ONLY;
+  /* Setting Amount = 0 will initiate the polling method: */
+  Amount = 0;
+  /* Set the maximum size of the Buffer: */
+  Buffer.Length = BufferLength;
+  EXEC SQL WHENEVER NOT FOUND DO break;
+  while (TRUE)
+    {
+      /* Read a piece of the BFILE into the Buffer: */
+      EXEC SQL LOB READ :Amount FROM :Lob_loc INTO :Buffer;
+      printf("Display %d bytes\n", Buffer.Length);
+    }
+  printf("Display %d bytes\n", Amount);
+  EXEC SQL LOB CLOSE :Lob_loc;
+  EXEC SQL FREE :Lob_loc;
+}
+
+void main()
+{
+  char *samp = "samp/samp";
+  EXEC SQL CONNECT :samp;
+  displayBFILE_proc();
+  EXEC SQL ROLLBACK WORK RELEASE;
+}

@@ -1,0 +1,54 @@
+/* This file is installed in the following path when you install */
+/* the database: $ORACLE_HOME/rdbms/demo/lobs/proc/lcopy.pc */
+
+/* Copying all or part of a LOB to another LOB */
+#include <oci.h>
+#include <stdio.h>
+#include <sqlca.h>
+
+void Sample_Error()
+{
+  EXEC SQL WHENEVER SQLERROR CONTINUE;
+  printf("%.*s\n", sqlca.sqlerrm.sqlerrml, sqlca.sqlerrm.sqlerrmc);
+  EXEC SQL ROLLBACK WORK RELEASE;
+  exit(1);
+}
+
+void copyLOB_proc()
+{
+  OCIBlobLocator *Dest_loc, *Src_loc;
+  int Amount = 5;
+  int Dest_pos = 10;
+  int Src_pos = 1;
+
+  EXEC SQL WHENEVER SQLERROR DO Sample_Error();
+  /* Allocate the LOB locators: */
+  EXEC SQL ALLOCATE :Dest_loc;
+  EXEC SQL ALLOCATE :Src_loc;
+  /* Select the LOBs: */
+  EXEC SQL SELECT ad_photo INTO :Dest_loc
+           FROM Print_media WHERE product_id = 2268 AND AD_ID = 21001 FOR UPDATE;
+  EXEC SQL SELECT ad_photo INTO :Src_loc
+           FROM Print_media WHERE product_id = 2056 AND ad_id = 12001;
+  /* Opening the LOBs is Optional: */
+  EXEC SQL LOB OPEN :Dest_loc READ WRITE;
+  EXEC SQL LOB OPEN :Src_loc READ ONLY;
+  /* Copies the specified Amount from the source position in the source
+     LOB to the destination position in the destination LOB: */
+  EXEC SQL LOB COPY :Amount
+               FROM :Src_loc AT :Src_pos TO :Dest_loc AT :Dest_pos;
+  /* Closing the LOBs is mandatory if they have been opened: */
+  EXEC SQL LOB CLOSE :Dest_loc;
+  EXEC SQL LOB CLOSE :Src_loc;
+  /* Release resources held by the locators: */
+  EXEC SQL FREE :Dest_loc;
+  EXEC SQL FREE :Src_loc;
+}
+
+void main()
+{
+  char *samp = "samp/samp";
+  EXEC SQL CONNECT :samp;
+  copyLOB_proc();
+  EXEC SQL ROLLBACK WORK RELEASE;
+}

@@ -1,0 +1,57 @@
+      * This file is installed in the following path when you install
+      * the database: $ORACLE_HOME/rdbms/demo/lobs/procob/lerase.pco
+
+     * ERASING PART OF A LOB
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. ERASE-BLOB.
+       ENVIRONMENT DIVISION.
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+
+       01  USERID   PIC X(11) VALUES "SAMP/SAMP".
+       01  BLOB1          SQL-BLOB.
+       01  AMT            PIC S9(9) COMP.
+       01  OFFSET         PIC S9(9) COMP.
+           EXEC SQL INCLUDE SQLCA END-EXEC.
+        
+       PROCEDURE DIVISION.
+       ERASE-BLOB.
+
+           EXEC SQL WHENEVER SQLERROR DO PERFORM SQL-ERROR END-EXEC.
+           EXEC SQL
+                CONNECT :USERID
+           END-EXEC.
+      * Allocate and initialize the BLOB locators: 
+           EXEC SQL ALLOCATE :BLOB1 END-EXEC.
+           EXEC SQL WHENEVER NOT FOUND GOTO END-OF-BLOB END-EXEC.
+           EXEC SQL 
+                SELECT AD_PHOTO INTO :BLOB1
+                FROM PRINT_MEDIA PM
+                WHERE PM.PRODUCT_ID = 2268 AND AD_ID = 21001 FOR UPDATE
+           END-EXEC.
+ 
+      * Open the BLOB: 
+           EXEC SQL LOB OPEN :BLOB1 READ WRITE END-EXEC.
+
+      * Move some value to AMT and OFFSET: 
+           MOVE 2 TO AMT.
+           MOVE 1 TO OFFSET.
+           EXEC SQL 
+                LOB ERASE :AMT FROM :BLOB1 AT :OFFSET END-EXEC.
+           EXEC SQL LOB CLOSE :BLOB1 END-EXEC.
+       END-OF-BLOB.
+           EXEC SQL WHENEVER NOT FOUND CONTINUE END-EXEC.
+           EXEC SQL FREE :BLOB1 END-EXEC.
+           EXEC SQL ROLLBACK WORK RELEASE END-EXEC.
+           STOP RUN.
+
+       SQL-ERROR.
+           EXEC SQL
+               WHENEVER SQLERROR CONTINUE
+           END-EXEC.
+           DISPLAY " ".
+           DISPLAY "ORACLE ERROR DETECTED:".
+           DISPLAY " ".
+           DISPLAY SQLERRMC.
+           EXEC SQL ROLLBACK WORK RELEASE END-EXEC.
+           STOP RUN.

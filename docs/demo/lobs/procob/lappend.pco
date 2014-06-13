@@ -1,0 +1,54 @@
+      * This file is installed in the following path when you install
+      * the database: $ORACLE_HOME/rdbms/demo/lobs/procob/lappend.pco
+
+     * APPENDING ONE LOB TO ANOTHER
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. LOB-APPEND.
+       ENVIRONMENT DIVISION.
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+       01  USERID        PIC X(11) VALUES "SAMP/SAMP".
+       01  DEST          SQL-BLOB.
+       01  SRC           SQL-BLOB.
+           EXEC SQL INCLUDE SQLCA END-EXEC.
+
+       PROCEDURE DIVISION.
+       APPEND-BLOB.
+           EXEC SQL WHENEVER SQLERROR DO PERFORM SQL-ERROR END-EXEC.
+           EXEC SQL CONNECT :USERID END-EXEC.
+
+      * Allocate and initialize the BLOB locators: 
+           EXEC SQL ALLOCATE :DEST END-EXEC.
+           EXEC SQL ALLOCATE :SRC END-EXEC.
+           EXEC SQL WHENEVER NOT FOUND GOTO END-OF-BLOB END-EXEC.
+           EXEC SQL SELECT AD_PHOTO INTO :DEST
+                FROM PRINT_MEDIA WHERE PRODUCT_ID = 2268 
+                AND AD_ID = 21001 FOR UPDATE END-EXEC.
+           EXEC SQL SELECT AD_PHOTO INTO :SRC
+                FROM PRINT_MEDIA WHERE PRODUCT_ID = 3060
+                AND AD_ID = 11001 END-EXEC.
+ 
+      * Open the DESTination LOB read/write and SRC LOB read only: 
+           EXEC SQL LOB OPEN :DEST READ WRITE END-EXEC.
+           EXEC SQL LOB OPEN :SRC READ ONLY END-EXEC.
+
+      * Append the source LOB to the destination LOB: 
+           EXEC SQL LOB APPEND :SRC TO :DEST END-EXEC.
+           EXEC SQL LOB CLOSE :DEST END-EXEC.
+           EXEC SQL LOB CLOSE :SRC END-EXEC.
+
+       END-OF-BLOB.
+           EXEC SQL WHENEVER NOT FOUND CONTINUE END-EXEC.
+           EXEC SQL FREE :DEST END-EXEC.
+           EXEC SQL FREE :SRC END-EXEC.
+           EXEC SQL ROLLBACK WORK RELEASE END-EXEC.
+           STOP RUN.
+
+       SQL-ERROR.
+           EXEC SQL WHENEVER SQLERROR CONTINUE END-EXEC.
+           DISPLAY " ".
+           DISPLAY "ORACLE ERROR DETECTED:".
+           DISPLAY " ".
+           DISPLAY SQLERRMC.
+           EXEC SQL ROLLBACK WORK RELEASE END-EXEC.
+           STOP RUN.

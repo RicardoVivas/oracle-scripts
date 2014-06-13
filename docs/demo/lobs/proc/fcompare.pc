@@ -1,0 +1,62 @@
+/* This file is installed in the following path when you install */
+/* the database: $ORACLE_HOME/rdbms/demo/lobs/proc/fcompare.pc */
+
+/* Comparing all or parts of two BFILES. 
+   Pro*C/C++ lacks an equivalent embedded SQL form for the
+   DBMS_LOB.COMPARE() function. Like the DBMS_LOB.SUBSTR() function,
+   however, Pro*C/C++ can invoke DBMS_LOB.COMPARE() in an anonymous PL/SQL
+   block as shown here:  */
+
+#include <oci.h>
+#include <stdio.h>
+#include <sqlca.h>
+
+void Sample_Error()
+{
+  EXEC SQL WHENEVER SQLERROR CONTINUE;
+  printf("%.*s\n", sqlca.sqlerrm.sqlerrml, sqlca.sqlerrm.sqlerrmc);
+  EXEC SQL ROLLBACK WORK RELEASE;
+  exit(1);
+}
+
+void compareBFILEs_proc()
+{
+  OCIBFileLocator *Lob_loc1, *Lob_loc2;
+  int Retval = 1;
+  char *Dir1 = "GRAPHIC_DIR", *Name1 = "mousepad_2056";
+
+  EXEC SQL WHENEVER SQLERROR DO Sample_Error();
+  EXEC SQL ALLOCATE :Lob_loc1;
+  EXEC SQL LOB FILE SET :Lob_loc1 DIRECTORY = :Dir1, FILENAME = :Name1;
+  EXEC SQL ALLOCATE :Lob_loc2;
+  EXEC SQL SELECT Photo INTO :Lob_loc2 FROM Print_media
+           WHERE Product_ID = 2056;
+  /* Open the BFILEs: */
+  EXEC SQL LOB OPEN :Lob_loc1 READ ONLY;
+  EXEC SQL LOB OPEN :Lob_loc2 READ ONLY;
+  /* Compare the BFILEs in PL/SQL using DBMS_LOB.COMPARE() */
+  EXEC SQL EXECUTE
+    BEGIN
+      :Retval := DBMS_LOB.COMPARE(
+                   :Lob_loc2, :Lob_loc1, DBMS_LOB.LOBMAXSIZE, 1, 1);
+    END;
+  END-EXEC;
+  /* Close the BFILEs:  */
+  EXEC SQL LOB CLOSE :Lob_loc1;
+  EXEC SQL LOB CLOSE :Lob_loc2;
+  if (0 == Retval)
+    printf("BFILEs are the same\n");
+  else
+    printf("BFILEs are not the same\n");
+  /* Release resources used by the locators: */
+  EXEC SQL FREE :Lob_loc1;
+  EXEC SQL FREE :Lob_loc2;
+}
+
+void main()
+{
+  char *samp = "samp/samp";
+  EXEC SQL CONNECT :samp;
+  compareBFILEs_proc();
+  EXEC SQL ROLLBACK WORK RELEASE;
+}

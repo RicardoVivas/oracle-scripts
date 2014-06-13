@@ -1,0 +1,47 @@
+/* This file is installed in the following path when you install */
+/* the database: $ORACLE_HOME/rdbms/demo/lobs/proc/lwriteap.pc */
+
+/* Write-appending to a LOB */
+#include <oci.h>
+#include <stdio.h>
+#include <sqlca.h>
+
+void Sample_Error()
+{
+  EXEC SQL WHENEVER SQLERROR CONTINUE;
+  printf("%.*s\n", sqlca.sqlerrm.sqlerrml, sqlca.sqlerrm.sqlerrmc);
+  EXEC SQL ROLLBACK WORK RELEASE;
+  exit(1);
+}
+
+#define BufferLength 128
+
+void LobWriteAppend_proc()
+{
+  OCIBlobLocator *Lob_loc;
+  int Amount = BufferLength;
+  /* Amount == BufferLength so only a single WRITE is needed: */
+  char Buffer[BufferLength];
+  /* Datatype equivalencing is mandatory for this datatype: */
+  EXEC SQL VAR Buffer IS RAW(BufferLength);
+  EXEC SQL ALLOCATE :Lob_loc;
+  EXEC SQL SELECT ad_composite INTO :Lob_loc
+           FROM Print_media 
+           WHERE product_id = 3060 AND ad_id = 11001 FOR UPDATE;
+  /* Opening the LOB is Optional: */
+  EXEC SQL LOB OPEN :Lob_loc;
+  memset((void *)Buffer, 1, BufferLength);  
+  /* Write the data from the buffer at the end of the LOB: */
+  EXEC SQL LOB WRITE APPEND :Amount FROM :Buffer INTO :Lob_loc;
+  /* Closing the LOB is mandatory if it has been opened: */
+  EXEC SQL LOB CLOSE :Lob_loc;
+  EXEC SQL FREE :Lob_loc;
+}
+
+void main()
+{
+  char *samp = "samp/samp";
+  EXEC SQL CONNECT :samp;
+  LobWriteAppend_proc();
+  EXEC SQL ROLLBACK WORK RELEASE;
+}

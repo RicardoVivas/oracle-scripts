@@ -1,0 +1,46 @@
+      * This file is installed in the following path when you install
+      * the database: $ORACLE_HOME/rdbms/demo/lobs/procob/freadprt.pco
+
+     * Reading portion of a BFILE data using substr.
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. BFILE-SUBSTR.
+       ENVIRONMENT DIVISION.
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+       01  BFILE1         SQL-BFILE.
+       01  BUFFER2        PIC X(32767) VARYING.
+       01  AMT            PIC S9(9) COMP.
+       01  POS            PIC S9(9) COMP VALUE 1024.
+       01  OFFSET         PIC S9(9) COMP VALUE 1.
+          
+           EXEC SQL INCLUDE SQLCA END-EXEC.
+           EXEC SQL VAR BUFFER2 IS VARRAW(32767) END-EXEC.
+
+       PROCEDURE DIVISION.
+       BFILE-SUBSTR.
+
+      * Allocate and initialize the CLOB locator: 
+           EXEC SQL ALLOCATE :BFILE1 END-EXEC.
+           EXEC SQL WHENEVER NOT FOUND GOTO END-OF-BFILE END-EXEC.
+           EXEC SQL 
+                SELECT PTAB.AD_GRAPHIC INTO :BFILE1
+                FROM PRINT_MEDIA PTAB WHERE PTAB.PRODUCT_ID = 3106 AND PTAB.AD_ID = 13001
+           END-EXEC.
+ 
+      * Open the BFILE for READ ONLY: 
+           EXEC SQL LOB OPEN :BFILE1 READ ONLY END-EXEC.
+
+      * Execute PL/SQL to use its SUBSTR functionality: 
+           MOVE 32767 TO AMT.
+           EXEC SQL EXECUTE
+             BEGIN 
+               :BUFFER2 := DBMS_LOB.SUBSTR(:BFILE1,:AMT,:POS);
+             END;
+           END-EXEC.
+
+      * Close and free the locators: 
+           EXEC SQL LOB CLOSE :BFILE1 END-EXEC.
+
+       END-OF-BFILE.
+           EXEC SQL WHENEVER NOT FOUND CONTINUE END-EXEC.
+           EXEC SQL FREE :BFILE1 END-EXEC.

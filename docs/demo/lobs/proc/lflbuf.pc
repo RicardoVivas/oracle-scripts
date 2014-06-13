@@ -1,0 +1,60 @@
+/* This file is installed in the following path when you install */
+/* the database: $ORACLE_HOME/rdbms/demo/lobs/proc/lflbuf.pc */
+
+/* Flushing the LOB Buffer (persistent LOBs)
+#include <oci.h>
+#include <stdio.h>
+#include <string.h>
+#include <sqlca.h>
+
+void Sample_Error()
+{
+  EXEC SQL WHENEVER SQLERROR CONTINUE;
+  printf("%.*s\n", sqlca.sqlerrm.sqlerrml, sqlca.sqlerrm.sqlerrmc);
+  EXEC SQL ROLLBACK WORK RELEASE;
+  exit(1);
+}
+
+#define BufferLength 256
+
+void flushBufferingLOB_proc()
+{
+  OCIBlobLocator *Lob_loc;
+  int Amount = BufferLength;
+  int multiple, Position = 1;
+
+  /* Datatype equivalencing is mandatory for this datatype: */
+  char Buffer[BufferLength];
+  EXEC SQL VAR Buffer is RAW(BufferLength);
+  EXEC SQL WHENEVER SQLERROR DO Sample_Error();
+
+  /* Allocate and Initialize the LOB: */
+  EXEC SQL ALLOCATE :Lob_loc;
+  EXEC SQL SELECT Sound INTO :Lob_loc
+             FROM Multimedia_tab WHERE Clip_ID = 1 FOR UPDATE;
+
+  /* Enable use of the LOB Buffering Subsystem: */
+  EXEC SQL LOB ENABLE BUFFERING :Lob_loc;
+  memset((void *)Buffer, 0, BufferLength);
+  for (multiple = 0; multiple < 8; multiple++)
+    {
+      /* Write data to the LOB: */
+      EXEC SQL LOB WRITE ONE :Amount
+                    FROM :Buffer INTO :Lob_loc AT :Position;
+      Position += BufferLength;
+    }
+  /* Flush the contents of the buffers and Free their resources: */
+  EXEC SQL LOB FLUSH BUFFER :Lob_loc FREE;
+  /* Turn off use of the LOB Buffering Subsystem: */
+  EXEC SQL LOB DISABLE BUFFERING :Lob_loc;
+  /* Release resources held by the Locator: */
+  EXEC SQL FREE :Lob_loc;
+}
+
+void main()
+{
+  char *samp = "samp/samp";
+  EXEC SQL CONNECT :samp;
+  flushBufferingLOB_proc();
+  EXEC SQL ROLLBACK WORK RELEASE;
+}

@@ -1,0 +1,48 @@
+/* This file is installed in the following path when you install */
+/* the database: $ORACLE_HOME/rdbms/demo/lobs/proc/fclosea.pc */
+
+/* Closing all open BFILEs. */
+
+#include <oci.h>
+#include <stdio.h>
+#include <sqlca.h>
+
+void Sample_Error()
+{
+  EXEC SQL WHENEVER SQLERROR CONTINUE;
+  printf("%.*s\n", sqlca.sqlerrm.sqlerrml, sqlca.sqlerrm.sqlerrmc);
+  EXEC SQL ROLLBACK WORK RELEASE;
+  exit(1);
+}
+
+void closeAllOpenBFILEs_proc()
+{
+  OCIBFileLocator *Lob_loc1, *Lob_loc2;
+
+  EXEC SQL WHENEVER SQLERROR DO Sample_Error();
+  EXEC SQL ALLOCATE :Lob_loc1;
+  EXEC SQL ALLOCATE :Lob_loc2;
+  /* Populate the Locators: */
+  EXEC SQL SELECT ad_graphic INTO :Lob_loc1
+              FROM Print_media 
+              WHERE product_id = 2056 AND ad_id = 12001;
+  EXEC SQL SELECT Mtab.ad_graphic INTO Lob_loc2
+              FROM Print_media PMtab 
+              WHERE PMtab.product_id = 3060 AND ad_id = 11001;
+  /* Open both BFILEs: */
+  EXEC SQL LOB OPEN :Lob_loc1 READ ONLY;
+  EXEC SQL LOB OPEN :Lob_loc2 READ ONLY;
+  /* Close all open BFILEs: */
+  EXEC SQL LOB FILE CLOSE ALL;
+  /* Free resources held by the Locators: */
+  EXEC SQL FREE :Lob_loc1;
+  EXEC SQL FREE :Lob_loc2;
+}
+
+void main()
+{
+  char *samp = "samp/samp";
+  EXEC SQL CONNECT :samp;
+  closeAllOpenBFILEs_proc();
+  EXEC SQL ROLLBACK WORK RELEASE;
+}

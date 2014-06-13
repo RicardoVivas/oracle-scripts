@@ -1,0 +1,68 @@
+      * This file is installed in the following path when you install
+      * the database: $ORACLE_HOME/rdbms/demo/lobs/procob/fclosea.pco
+
+     * Closing all open BFILEs. 
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. BFILE-CLOSE-ALL.
+       ENVIRONMENT DIVISION.
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+
+       01  USERID   PIC X(11) VALUES "SAMP/SAMP".
+       01  BFILE1         SQL-BFILE.
+       01  BFILE2         SQL-BFILE.
+       01  DIR-ALIAS1     PIC X(30) VARYING.
+       01  FNAME1         PIC X(20) VARYING.
+       01  DIR-ALIAS2     PIC X(30) VARYING.
+       01  FNAME2         PIC X(20) VARYING.
+       01  ORASLNRD       PIC 9(4).
+
+           EXEC SQL INCLUDE SQLCA END-EXEC.
+           EXEC ORACLE OPTION (ORACA=YES) END-EXEC.
+           EXEC SQL INCLUDE ORACA END-EXEC.
+
+       PROCEDURE DIVISION.
+       BFILE-CLOSE-ALL.
+
+           EXEC SQL WHENEVER SQLERROR DO PERFORM SQL-ERROR END-EXEC.
+           EXEC SQL
+                CONNECT :USERID
+           END-EXEC.
+
+      * Allocate the BFILEs: 
+           EXEC SQL ALLOCATE :BFILE1 END-EXEC.
+           EXEC SQL ALLOCATE :BFILE2 END-EXEC.
+
+      * Set up the directory and file information: 
+           MOVE "ADGRAPHIC_DIR" TO DIR-ALIAS1-ARR.
+           MOVE 9 TO DIR-ALIAS1-LEN.
+           MOVE "keyboard_graphic_3106_13001" TO FNAME1-ARR.
+           MOVE 16 TO FNAME1-LEN.
+ 
+           EXEC SQL 
+                LOB FILE SET :BFILE1
+                DIRECTORY = :DIR-ALIAS1, FILENAME = :FNAME1 END-EXEC.
+           EXEC SQL LOB OPEN :BFILE1 READ ONLY END-EXEC.
+
+      * Set up the directory and file information: 
+           MOVE "ADGRAPHIC_DIR" TO DIR-ALIAS2-ARR.
+           MOVE 9 TO DIR-ALIAS2-LEN.
+           MOVE "mousepad_graphic_2056_12001" TO FNAME2-ARR.
+           MOVE 13 TO FNAME2-LEN.
+           EXEC SQL LOB FILE SET :BFILE2
+                DIRECTORY = :DIR-ALIAS2, FILENAME = :FNAME2 END-EXEC.
+           EXEC SQL LOB OPEN :BFILE2 READ ONLY END-EXEC.
+
+      * Close both BFILE1 and BFILE2: 
+           EXEC SQL LOB FILE CLOSE ALL END-EXEC.
+           STOP RUN.
+
+       SQL-ERROR.
+           EXEC SQL WHENEVER SQLERROR CONTINUE END-EXEC.
+           MOVE ORASLNR TO ORASLNRD.
+           DISPLAY " ".
+           DISPLAY "ORACLE ERROR DETECTED ON LINE ", ORASLNRD, ":".
+           DISPLAY " ".
+           DISPLAY SQLERRMC.
+           EXEC SQL ROLLBACK WORK RELEASE END-EXEC.
+           STOP RUN.

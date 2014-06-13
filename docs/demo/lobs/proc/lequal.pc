@@ -1,0 +1,58 @@
+/* This file is installed in the following path when you install */
+/* the database: $ORACLE_HOME/rdbms/demo/lobs/proc/lequal.pc */
+
+/* Seeing if One LOB locator is equal to another */
+/* Pro*C/C++ does not provide a mechanism to test the equality of two
+   locators. But you can use OCI directly. Two locators can be
+   compared to determine whether or not they are equal as this example
+   demonstrates: */
+
+#include <sql2oci.h>
+#include <stdio.h>
+#include <sqlca.h>
+
+void Sample_Error()
+{
+  EXEC SQL WHENEVER SQLERROR CONTINUE;
+  printf("%.*s\n", sqlca.sqlerrm.sqlerrml, sqlca.sqlerrm.sqlerrmc);
+  EXEC SQL ROLLBACK WORK RELEASE;
+  exit(1);
+}
+
+void LobLocatorIsEqual_proc()
+{
+  OCIBlobLocator *Lob_loc1, *Lob_loc2;
+  OCIEnv *oeh;
+  boolean isEqual;
+  EXEC SQL WHENEVER SQLERROR DO Sample_Error();
+  EXEC SQL ALLOCATE :Lob_loc1;
+  EXEC SQL ALLOCATE :Lob_loc2;
+  EXEC SQL SELECT ad_composite INTO Lob_loc1
+           FROM Print_media 
+           where product_id = 3060 AND ad_id = 11001 FOR UPDATE;
+  /* Assign Lob_loc1 to Lob_loc2 thereby saving a copy of the value of the
+     LOB at this point in time: */
+  EXEC SQL LOB ASSIGN :Lob_loc1 TO :Lob_loc2;
+  /* When you write some data to the lob through Lob_loc1, Lob_loc2 will
+     not see the newly written data whereas Lob_loc1 will see the new
+     data. */
+  /* Get the OCI Environment Handle using a SQLLIB Routine: */
+  (void) SQLEnvGet(SQL_SINGLE_RCTX, &oeh);
+  /* Call OCI to see if the two locators are Equal: */
+  (void) OCILobIsEqual(oeh, Lob_loc1, Lob_loc2, &isEqual);
+  if (isEqual)
+    printf("The locators are equal\n");
+  else
+    printf("The locators are not equal\n");
+  /* Note that in this example, the LOB locators will be Equal */
+  EXEC SQL FREE :Lob_loc1;
+  EXEC SQL FREE :Lob_loc2;
+}
+
+void main()
+{
+  char *samp = "samp/samp";
+  EXEC SQL CONNECT :samp;
+  LobLocatorIsEqual_proc();
+  EXEC SQL ROLLBACK WORK RELEASE;
+}

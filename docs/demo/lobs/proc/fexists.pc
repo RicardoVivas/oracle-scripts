@@ -1,0 +1,39 @@
+/* This file is installed in the following path when you install */
+/* the database: $ORACLE_HOME/rdbms/demo/lobs/proc/fexists.pc */
+
+/* Checking if a BFILE exists. */
+
+#include <oci.h>
+#include <stdio.h>
+#include <sqlca.h>
+
+void Sample_Error()
+{
+  EXEC SQL WHENEVER SQLERROR CONTINUE;
+  printf("%.*s\n", sqlca.sqlerrm.sqlerrml, sqlca.sqlerrm.sqlerrmc);
+  EXEC SQL ROLLBACK WORK RELEASE;
+  exit(1);
+}
+
+void seeIfBFILEExists_proc()
+{
+  OCIBFileLocator *Lob_loc;
+  unsigned int Exists = 0;
+
+  EXEC SQL WHENEVER SQLERROR DO Sample_Error();
+  EXEC SQL ALLOCATE :Lob_loc;
+  EXEC SQL SELECT PMtab.ad_graphic INTO :Lob_loc
+           FROM Print_media PMtab WHERE PMtab.Product_ID = 2056 AND PMtab.ad_id = 12001;
+  /* See if the BFILE Exists:  */
+  EXEC SQL LOB DESCRIBE :Lob_loc GET FILEEXISTS INTO :Exists;
+  printf("BFILE %s exist\n", Exists ? "does" : "does not");
+  EXEC SQL FREE :Lob_loc;
+}
+
+void main()
+{
+  char *samp = "samp/samp";
+  EXEC SQL CONNECT :samp;
+  seeIfBFILEExists_proc();
+  EXEC SQL ROLLBACK WORK RELEASE;
+}

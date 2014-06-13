@@ -1,0 +1,42 @@
+/* This file is installed in the following path when you install */
+/* the database: $ORACLE_HOME/rdbms/demo/lobs/proc/llength.pc */
+
+/* Getting the length of a LOB */
+#include <oci.h>
+#include <stdio.h>
+#include <sqlca.h>
+
+void Sample_Error()
+{
+  EXEC SQL WHENEVER SQLERROR CONTINUE;
+  printf("%.*s\n", sqlca.sqlerrm.sqlerrml, sqlca.sqlerrm.sqlerrmc);
+  EXEC SQL ROLLBACK WORK RELEASE;
+  exit(1);
+}
+void getLengthLOB_proc()
+{
+  OCIClobLocator *Lob_loc;
+  unsigned int Length;
+
+  EXEC SQL WHENEVER SQLERROR DO Sample_Error();
+  EXEC SQL ALLOCATE :Lob_loc;
+  EXEC SQL SELECT ad_sourcetext INTO :Lob_loc
+           FROM Print_media WHERE product_id = 3060 AND ad_id = 11001;
+  /* Opening the LOB is Optional: */
+  EXEC SQL LOB OPEN :Lob_loc READ ONLY;
+  /* Get the Length: */
+  EXEC SQL LOB DESCRIBE :Lob_loc GET LENGTH INTO :Length;
+  /* If the LOB is NULL or unitialized, then Length is Undefined: */
+  printf("Length is %d characters\n", Length);
+  /* Closing the LOB is mandatory if you have Opened it: */
+  EXEC SQL LOB CLOSE :Lob_loc;
+  EXEC SQL FREE :Lob_loc;
+}
+
+void main()
+{
+  char *samp = "samp/samp";
+  EXEC SQL CONNECT :samp;
+  getLengthLOB_proc();
+  EXEC SQL ROLLBACK WORK RELEASE;
+}

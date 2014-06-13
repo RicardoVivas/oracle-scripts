@@ -1,0 +1,48 @@
+      * This file is installed in the following path when you install
+      * the database: $ORACLE_HOME/rdbms/demo/lobs/procob/linsert.pco
+
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. INSERT-LOB.
+       ENVIRONMENT DIVISION.
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+
+       01 BLOB1 SQL-BLOB.
+       01  USERID   PIC X(11) VALUES "PM/PM".
+           EXEC SQL INCLUDE SQLCA END-EXEC.
+
+       PROCEDURE DIVISION.
+       INSERT-LOB.
+    
+           EXEC SQL WHENEVER SQLERROR DO PERFORM SQL-ERROR END-EXEC.
+           EXEC SQL CONNECT :USERID END-EXEC.
+
+      * Initialize the BLOB locator
+           EXEC SQL ALLOCATE :BLOB1 END-EXEC.
+
+      * Populate the LOB
+           EXEC SQL WHENEVER NOT FOUND GOTO END-OF-BLOB END-EXEC.
+           EXEC SQL 
+              SELECT AD_PHOTO INTO :BLOB1
+                 FROM PRINT_MEDIA WHERE PRODUCT_ID = 2268 AND AD_ID = 21001 END-EXEC.
+  
+      * Insert the value with PRODUCT_ID of 3060
+           EXEC SQL 
+              INSERT INTO PRINT_MEDIA (PRODUCT_ID, AD_PHOTO)
+                 VALUES (3060, 11001, :BLOB1)END-EXEC.
+
+      * Free resources held by locator
+       END-OF-BLOB.
+           EXEC SQL WHENEVER NOT FOUND CONTINUE END-EXEC.
+           EXEC SQL FREE :BLOB1 END-EXEC.
+           EXEC SQL ROLLBACK WORK RELEASE END-EXEC.
+           STOP RUN.
+
+       SQL-ERROR.
+           EXEC SQL WHENEVER SQLERROR CONTINUE END-EXEC.
+           DISPLAY " ".
+           DISPLAY "ORACLE ERROR DETECTED:".
+           DISPLAY " ".
+           DISPLAY SQLERRMC.
+           EXEC SQL ROLLBACK WORK RELEASE END-EXEC.
+           STOP RUN.

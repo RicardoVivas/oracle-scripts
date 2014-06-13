@@ -1,0 +1,63 @@
+      * This file is installed in the following path when you install
+      * the database: $ORACLE_HOME/rdbms/demo/lobs/procob/linstr.pco
+
+     * SEEING IF A PATTERN EXISTS IN THE LOB USING INSTR
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. CLOB-INSTR.
+       ENVIRONMENT DIVISION.
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+       01  CLOB1          SQL-CLOB.
+       01  PATTERN        PIC X(8) VALUE "children".
+       01  POS            PIC S9(9) COMP.
+       01  OFFSET         PIC S9(9) COMP VALUE 1.
+       01  OCCURRENCE     PIC S9(9) COMP VALUE 1.
+       01  USERID   PIC X(11) VALUES "SAMP/SAMP".
+           EXEC SQL INCLUDE SQLCA END-EXEC.
+
+       PROCEDURE DIVISION.
+       CLOB-INSTR.
+           EXEC SQL WHENEVER SQLERROR DO PERFORM SQL-ERROR END-EXEC.
+           EXEC SQL
+                CONNECT :USERID
+           END-EXEC.
+
+      * Allocate and initialize the CLOB locator: 
+           EXEC SQL ALLOCATE :CLOB1 END-EXEC.
+            EXEC SQL WHENEVER NOT FOUND GOTO END-OF-CLOB END-EXEC.
+             EXEC SQL SELECT AD_SOURCETEXT INTO :CLOB1
+                FROM PRINT_MEDIA 
+                WHERE PRODUCT_ID = 2268 AND AD_ID = 21001 END-EXEC.
+ 
+      * Open the CLOB for READ ONLY: 
+           EXEC SQL LOB OPEN :CLOB1 READ ONLY END-EXEC.
+
+      * Execute PL/SQL to get INSTR functionality:
+           EXEC SQL EXECUTE
+             BEGIN 
+               :POS := DBMS_LOB.INSTR(:CLOB1, :PATTERN,:OFFSET,:OCCURRENCE);
+               END; END-EXEC.
+           
+           IF POS = 0
+      *        Logic for pattern not found here
+               DISPLAY "Pattern not found."
+           ELSE
+      *        Pos contains position where pattern is found
+               DISPLAY "Pattern found."
+           END-IF.
+           EXEC SQL LOB CLOSE :CLOB1 END-EXEC.
+
+       END-OF-CLOB.
+           EXEC SQL WHENEVER NOT FOUND CONTINUE END-EXEC.
+           EXEC SQL FREE :CLOB1 END-EXEC.
+           EXEC SQL ROLLBACK WORK RELEASE END-EXEC.
+           STOP RUN.
+
+       SQL-ERROR.
+           EXEC SQL WHENEVER SQLERROR CONTINUE END-EXEC.
+           DISPLAY " ".
+           DISPLAY "ORACLE ERROR DETECTED:".
+           DISPLAY " ".
+           DISPLAY SQLERRMC.
+           EXEC SQL ROLLBACK WORK RELEASE END-EXEC.
+           STOP RUN.

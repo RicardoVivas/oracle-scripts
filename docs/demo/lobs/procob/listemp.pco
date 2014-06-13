@@ -1,0 +1,61 @@
+      * This file is installed in the following path when you install
+      * the database: $ORACLE_HOME/rdbms/demo/lobs/procob/listemp.pco
+
+     * Checking if a LOB is temporary.
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. TEMP-LOB-ISTEMP.
+       ENVIRONMENT DIVISION.
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+
+       01  USERID   PIC X(11) VALUES "SAMP/SAMP".
+       01  TEMP-BLOB      SQL-BLOB.
+       01  IS-TEMP        PIC S9(9) COMP.
+       01  ORASLNRD       PIC 9(4).
+
+           EXEC SQL INCLUDE SQLCA END-EXEC.
+           EXEC ORACLE OPTION (ORACA=YES) END-EXEC.
+           EXEC SQL INCLUDE ORACA END-EXEC.
+
+       PROCEDURE DIVISION.
+       CREATE-TEMPORARY.
+           EXEC SQL WHENEVER SQLERROR DO PERFORM SQL-ERROR END-EXEC.
+           EXEC SQL
+                CONNECT :USERID
+           END-EXEC.
+
+      * Allocate and initialize the BLOB locators: 
+           EXEC SQL ALLOCATE :TEMP-BLOB END-EXEC.
+           EXEC SQL 
+                LOB CREATE TEMPORARY :TEMP-BLOB
+           END-EXEC.
+
+      * Check if the LOB is temporary: 
+           EXEC SQL 
+                LOB DESCRIBE :TEMP-BLOB
+                GET ISTEMPORARY INTO :IS-TEMP
+           END-EXEC.
+     
+           IF IS-TEMP = 1
+      *      Logic for a temporary LOB goes here
+             DISPLAY "LOB is temporary."
+           ELSE
+      *      Logic for a persistent LOB goes here.
+             DISPLAY "LOB is persistent."
+           END-IF.
+
+           EXEC SQL 
+                LOB FREE TEMPORARY :TEMP-BLOB 
+           END-EXEC.
+           EXEC SQL FREE :TEMP-BLOB END-EXEC.
+           STOP RUN.
+
+       SQL-ERROR.
+           EXEC SQL WHENEVER SQLERROR CONTINUE END-EXEC.
+           MOVE ORASLNR TO ORASLNRD.
+           DISPLAY " ".
+           DISPLAY "ORACLE ERROR DETECTED ON LINE ", ORASLNRD, ":".
+           DISPLAY " ".
+           DISPLAY SQLERRMC.
+           EXEC SQL ROLLBACK WORK RELEASE END-EXEC.
+           STOP RUN.
